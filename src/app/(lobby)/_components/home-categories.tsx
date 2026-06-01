@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { ArrowRightIcon } from "@radix-ui/react-icons"
 
 import { homeContent } from "@/config/home"
 import { type getCategories } from "@/lib/queries/product"
@@ -20,9 +21,10 @@ export function HomeCategories({ categories }: HomeCategoriesProps) {
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 -top-16 h-16 bg-gradient-to-b from-[#070b12] to-background"
+        className="pointer-events-none absolute inset-x-0 -top-20 h-20 bg-gradient-to-b from-[#070b12] via-[#070b12]/60 to-background"
       />
       <HomeSectionHeader
+        sectionNumber="01"
         eyebrow="Catálogo"
         title={sections.categories.title}
         description={sections.categories.description}
@@ -33,12 +35,13 @@ export function HomeCategories({ categories }: HomeCategoriesProps) {
           <CategoryCard key={category.id} category={category} index={index} />
         ))}
       </div>
-      <div className="mt-8 flex justify-center sm:hidden">
+      <div className="mt-10 flex justify-center sm:hidden">
         <Link
           href="/products"
-          className="text-sm font-medium text-foreground underline-offset-4 hover:underline"
+          className="inline-flex items-center gap-2 text-sm font-medium text-teal-700 underline-offset-4 hover:text-teal-800 hover:underline dark:text-teal-400"
         >
           Ver todas las categorías
+          <ArrowRightIcon className="size-4" aria-hidden="true" />
         </Link>
       </div>
     </section>

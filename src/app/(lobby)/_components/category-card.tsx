@@ -12,22 +12,27 @@ import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Icons } from "@/components/icons"
 
+/** Variaciones dentro de la familia teal — cohesión clínica, no arcoíris. */
 const categoryThemes = [
   {
-    gradient: "from-teal-500/30 via-cyan-950 to-zinc-950",
-    glow: "bg-teal-400/20",
+    gradient: "from-teal-950/90 via-slate-950 to-black",
+    glow: "bg-teal-400/15",
+    ring: "ring-teal-500/20",
   },
   {
-    gradient: "from-blue-500/30 via-indigo-950 to-zinc-950",
-    glow: "bg-blue-400/20",
+    gradient: "from-cyan-950/85 via-slate-950 to-black",
+    glow: "bg-cyan-400/12",
+    ring: "ring-cyan-500/15",
   },
   {
-    gradient: "from-violet-500/30 via-purple-950 to-zinc-950",
-    glow: "bg-violet-400/20",
+    gradient: "from-emerald-950/80 via-slate-950 to-black",
+    glow: "bg-emerald-400/12",
+    ring: "ring-emerald-500/15",
   },
   {
-    gradient: "from-emerald-500/30 via-teal-950 to-zinc-950",
-    glow: "bg-emerald-400/20",
+    gradient: "from-sky-950/75 via-slate-950 to-black",
+    glow: "bg-sky-400/10",
+    ring: "ring-sky-500/15",
   },
 ] as const
 
@@ -41,11 +46,16 @@ export function CategoryCard({ category, index = 0 }: CategoryCardProps) {
     categoryId: category.id,
   })
   const theme = categoryThemes[index % categoryThemes.length]
+  const displayIndex = String(index + 1).padStart(2, "0")
 
   return (
     <Link
       href={`/collections/${category.slug}`}
-      className="group relative block overflow-hidden rounded-2xl ring-1 ring-border/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:ring-border"
+      className={cn(
+        "group relative block overflow-hidden rounded-xl ring-1 transition-all duration-300",
+        "ring-border/40 hover:ring-teal-500/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500/50",
+        theme.ring
+      )}
     >
       <AspectRatio ratio={4 / 5}>
         <div
@@ -60,35 +70,40 @@ export function CategoryCard({ category, index = 0 }: CategoryCardProps) {
             src={category.image}
             alt=""
             fill
-            className="object-cover opacity-35 mix-blend-luminosity transition-transform duration-700 group-hover:scale-105 group-hover:opacity-45"
+            className="object-cover opacity-30 mix-blend-luminosity transition-all duration-700 group-hover:scale-[1.03] group-hover:opacity-40"
             sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
           />
         ) : null}
         <div
           className={cn(
-            "absolute -right-8 top-8 size-32 rounded-full blur-3xl transition-transform duration-500 group-hover:scale-110",
+            "absolute -right-6 top-6 size-28 rounded-full opacity-80 blur-3xl transition-opacity duration-500 group-hover:opacity-100",
             theme.glow
           )}
           aria-hidden="true"
         />
         <div
-          className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/10"
+          className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent"
           aria-hidden="true"
         />
-        <div className="absolute left-5 top-5 flex size-10 items-center justify-center rounded-xl bg-white/10 text-white backdrop-blur-sm">
-          <Icons.product className="size-4" aria-hidden="true" />
+        <div className="absolute left-5 top-5 flex items-center gap-2">
+          <span className="font-mono text-[10px] font-medium tracking-widest text-white/40">
+            {displayIndex}
+          </span>
+          <div className="flex size-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-white backdrop-blur-sm">
+            <Icons.product className="size-3.5" aria-hidden="true" />
+          </div>
         </div>
       </AspectRatio>
       <div className="absolute inset-x-0 bottom-0 p-5 md:p-6">
-        <h3 className="text-lg font-semibold capitalize tracking-tight text-white md:text-xl">
+        <h3 className="font-heading text-lg font-semibold capitalize tracking-tight text-white md:text-xl">
           {category.name}
         </h3>
         {category.description ? (
-          <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-white/75">
+          <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-white/70">
             {category.description}
           </p>
         ) : null}
-        <div className="mt-4 flex items-center justify-between gap-3">
+        <div className="mt-4 flex items-center justify-between gap-3 border-t border-white/10 pt-4">
           <React.Suspense
             fallback={
               <Skeleton className="h-4 w-24 rounded-full bg-white/20" />
@@ -96,8 +111,8 @@ export function CategoryCard({ category, index = 0 }: CategoryCardProps) {
           >
             <ProductCount productCountPromise={productCountPromise} />
           </React.Suspense>
-          <span className="flex size-8 items-center justify-center rounded-full bg-white/15 text-white opacity-0 backdrop-blur-sm transition-all duration-300 group-hover:opacity-100">
-            <ArrowRightIcon className="size-4" aria-hidden="true" />
+          <span className="flex size-8 items-center justify-center rounded-full border border-white/15 text-white opacity-0 transition-all duration-300 group-hover:opacity-100">
+            <ArrowRightIcon className="size-3.5" aria-hidden="true" />
           </span>
         </div>
       </div>
@@ -113,8 +128,8 @@ async function ProductCount({ productCountPromise }: ProductCountProps) {
   const count = await productCountPromise
 
   return (
-    <div className="flex items-center gap-1.5 text-xs font-medium text-white/80">
-      <Icons.product className="size-3.5" aria-hidden="true" />
+    <div className="flex items-center gap-1.5 font-mono text-[11px] font-medium tracking-wide text-white/75">
+      <Icons.product className="size-3" aria-hidden="true" />
       {count} {count === 1 ? "producto" : "productos"}
     </div>
   )

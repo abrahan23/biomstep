@@ -21,6 +21,7 @@ export function HomeFaq() {
       <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
         <div className="lg:col-span-4 lg:sticky lg:top-24 lg:self-start">
           <HomeSectionHeader
+            sectionNumber="05"
             eyebrow="Ayuda"
             title={faq.title}
             description={faq.description}
@@ -28,25 +29,30 @@ export function HomeFaq() {
           />
         </div>
         <div className="lg:col-span-8">
-          <Accordion
-            type="single"
-            collapsible
-            className="overflow-hidden rounded-2xl border bg-card shadow-sm ring-1 ring-border/50"
-          >
-            {faq.items.map((item, index) => (
-              <AccordionItem
-                key={item.question}
-                value={`faq-${index}`}
-                className="border-b px-5 last:border-b-0 md:px-7"
-              >
-                <AccordionTrigger className="py-5 text-left text-base font-medium hover:no-underline md:py-6 md:text-lg">
-                  {item.question}
-                </AccordionTrigger>
-                <AccordionContent className="pb-5 text-sm leading-relaxed text-muted-foreground md:pb-6 md:text-base">
-                  {item.answer}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
+          <Accordion type="single" collapsible className="space-y-3">
+            {faq.items.map((item, index) => {
+              const itemNumber = String(index + 1).padStart(2, "0")
+
+              return (
+                <AccordionItem
+                  key={item.question}
+                  value={`faq-${index}`}
+                  className="overflow-hidden rounded-xl border border-border/60 bg-card px-0 data-[state=open]:border-teal-500/25"
+                >
+                  <AccordionTrigger className="gap-4 px-5 py-5 text-left hover:no-underline md:px-6 md:py-6 [&[data-state=open]>span:first-child]:text-teal-600 dark:[&[data-state=open]>span:first-child]:text-teal-400">
+                    <span className="shrink-0 font-mono text-[11px] font-medium tracking-widest text-muted-foreground transition-colors">
+                      {itemNumber}
+                    </span>
+                    <span className="flex-1 text-base font-medium md:text-lg">
+                      {item.question}
+                    </span>
+                  </AccordionTrigger>
+                  <AccordionContent className="border-t border-border/40 px-5 pb-5 pl-[3.25rem] text-sm leading-relaxed text-muted-foreground md:px-6 md:pb-6 md:pl-[3.5rem] md:text-base md:leading-7">
+                    {item.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              )
+            })}
           </Accordion>
         </div>
       </div>
