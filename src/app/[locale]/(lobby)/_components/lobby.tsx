@@ -30,13 +30,15 @@ export async function Lobby({
   return (
     <>
       <HomeHero videoUrl={heroVideoUrl} />
-      <Shell className="max-w-6xl gap-0">
-        <HomeCategories categories={categories} />
-        <HomeBestSellers products={bestSellingProducts} />
-        <HomeBenefits />
-        <HomeTestimonials />
-        <HomeFaq />
-      </Shell>
+      <div className="relative z-10 bg-background">
+        <Shell className="max-w-6xl gap-0">
+          <HomeCategories categories={categories} />
+          <HomeBestSellers products={bestSellingProducts} />
+          <HomeBenefits />
+          <HomeTestimonials />
+          <HomeFaq />
+        </Shell>
+      </div>
     </>
   )
 }

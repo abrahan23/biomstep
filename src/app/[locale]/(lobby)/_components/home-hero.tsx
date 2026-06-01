@@ -263,10 +263,29 @@ export function HomeHero({ videoUrl }: HomeHeroProps) {
   })
 
   const [scrollProgress, setScrollProgress] = React.useState(0)
+  const [heroVisible, setHeroVisible] = React.useState(true)
 
   useMotionValueEvent(scrollYProgress, "change", (value) => {
     setScrollProgress(value)
   })
+
+  React.useEffect(() => {
+    const updateHeroVisibility = () => {
+      const section = containerRef.current
+      if (!section) return
+
+      setHeroVisible(section.getBoundingClientRect().bottom > 0)
+    }
+
+    updateHeroVisibility()
+    window.addEventListener("scroll", updateHeroVisibility, { passive: true })
+    window.addEventListener("resize", updateHeroVisibility)
+
+    return () => {
+      window.removeEventListener("scroll", updateHeroVisibility)
+      window.removeEventListener("resize", updateHeroVisibility)
+    }
+  }, [scrollTrackVh, videoUrl])
 
   const contentYOffset = mapRange(scrollProgress, 0, 0.55, 0, -32)
   const contentOpacityValue = mapRange(scrollProgress, 0.88, 0.98, 1, 0)
@@ -308,17 +327,25 @@ export function HomeHero({ videoUrl }: HomeHeroProps) {
   const videoComplete = scrollProgress >= 0.985
 
   return (
-    <section
-      ref={containerRef}
-      className="relative w-full"
-      style={
-        videoUrl
-          ? { height: `calc(100dvh + ${scrollTrackVh}vh)` }
-          : { height: "240vh" }
-      }
-      aria-label={t("ariaLabel")}
-    >
-      <div className="sticky top-0 flex h-[100dvh] flex-col overflow-hidden bg-[#070b12] text-white">
+    <>
+      <section
+        ref={containerRef}
+        className="relative w-full"
+        style={
+          videoUrl
+            ? { height: `calc(100dvh + ${scrollTrackVh}vh)` }
+            : { height: "240vh" }
+        }
+        aria-hidden="true"
+      />
+      <div
+        className={cn(
+          "fixed inset-x-0 top-0 z-[1] flex h-[100dvh] flex-col overflow-hidden bg-[#070b12] text-white transition-opacity duration-300",
+          !heroVisible && "pointer-events-none opacity-0"
+        )}
+        aria-label={t("ariaLabel")}
+        aria-hidden={!heroVisible}
+      >
         {videoUrl ? (
           <motion.div
             style={{ scale: videoScaleValue }}
@@ -461,6 +488,6 @@ export function HomeHero({ videoUrl }: HomeHeroProps) {
           </div>
         </div>
       </div>
-    </section>
+    </>
   )
 }
