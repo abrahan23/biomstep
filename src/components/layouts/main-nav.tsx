@@ -16,6 +16,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 import { Icons } from "@/components/icons"
+import { SiteLogo } from "@/components/site-logo"
 
 interface MainNavProps {
   items?: MainNavItem[]
@@ -24,11 +25,9 @@ interface MainNavProps {
 export function MainNav({ items }: MainNavProps) {
   return (
     <div className="hidden gap-6 lg:flex">
-      <Link href="/" className="hidden items-center space-x-2 lg:flex">
-        <Icons.logo className="size-7" aria-hidden="true" />
-        <span className="hidden font-bold lg:inline-block">
-          {siteConfig.name}
-        </span>
+      <Link href="/" className="hidden items-center lg:flex">
+        <SiteLogo className="h-14 w-auto" priority />
+        <span className="sr-only">{siteConfig.name}</span>
         <span className="sr-only">Home</span>
       </Link>
       <NavigationMenu>

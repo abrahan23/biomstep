@@ -6,7 +6,6 @@ import { useSelectedLayoutSegment } from "next/navigation"
 import type { MainNavItem } from "@/types"
 
 import { siteConfig } from "@/config/site"
-import { Link } from "@/i18n/routing"
 import { cn } from "@/lib/utils"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { LocaleSwitcher } from "@/components/layouts/locale-switcher"
@@ -19,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { SiteLogo } from "@/components/site-logo"
 import { Icons } from "@/components/icons"
 
 interface MobileNavProps {
@@ -51,8 +51,8 @@ export function MobileNav({ items }: MobileNavProps) {
             className="flex items-center"
             onClick={() => setOpen(false)}
           >
-            <Icons.logo className="mr-2 size-4" aria-hidden="true" />
-            <span className="font-bold">{siteConfig.name}</span>
+            <SiteLogo className="h-5 w-auto" />
+            <span className="sr-only">{siteConfig.name}</span>
             <span className="sr-only">Home</span>
           </Link>
           <LocaleSwitcher />

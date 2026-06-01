@@ -1,4 +1,6 @@
-import Link from "next/link"
+import { getTranslations } from "next-intl/server"
+
+import { Link } from "@/i18n/routing"
 
 import { getCart } from "@/lib/actions/cart"
 import { cn, formatPrice } from "@/lib/utils"
@@ -18,7 +20,9 @@ interface CheckoutCardProps {
 }
 
 export async function CheckoutCard({ storeId }: CheckoutCardProps) {
+  const t = await getTranslations("Cart")
   const cartLineItems = await getCart({ storeId })
+  const itemCount = cartLineItems.reduce((acc, item) => acc + item.quantity, 0)
 
   return (
     <Card
@@ -35,7 +39,7 @@ export async function CheckoutCard({ storeId }: CheckoutCardProps) {
           {cartLineItems[0]?.storeName}
         </CardTitle>
         <Link
-          aria-label="Checkout"
+          aria-label={t("storeCheckout")}
           href={`/checkout/${storeId}`}
           className={cn(
             buttonVariants({
@@ -43,7 +47,7 @@ export async function CheckoutCard({ storeId }: CheckoutCardProps) {
             })
           )}
         >
-          Checkout
+          {t("storeCheckout")}
         </Link>
       </CardHeader>
       <Separator className="mb-4" />
@@ -53,7 +57,7 @@ export async function CheckoutCard({ storeId }: CheckoutCardProps) {
       <Separator className="mb-4" />
       <CardFooter className="space-x-4">
         <span className="flex-1">
-          Total ({cartLineItems.reduce((acc, item) => acc + item.quantity, 0)})
+          {t("totalItems", { count: itemCount })}
         </span>
         <span>
           {formatPrice(

@@ -3,12 +3,12 @@
 import * as React from "react"
 import Link from "next/link"
 import { useSelectedLayoutSegments } from "next/navigation"
-import { type SidebarNavItem } from "@/types"
 
+import { adminConfig } from "@/config/admin"
 import { siteConfig } from "@/config/site"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Icons } from "@/components/icons"
+import { SiteLogo } from "@/components/site-logo"
 import { SidebarNav } from "@/components/layouts/sidebar-nav"
 
 interface AdminSidebarProps extends React.HTMLAttributes<HTMLElement> {
@@ -22,38 +22,13 @@ export function AdminSidebar({
 }: AdminSidebarProps) {
   const segments = useSelectedLayoutSegments()
 
-  const sidebarNav: SidebarNavItem[] = [
-    {
-      title: "Dashboard",
-      href: "/admin",
-      icon: "dashboard",
-      active: segments.length === 0,
-    },
-    {
-      title: "Products",
-      href: "/admin/products",
-      icon: "product",
-      active: segments.includes("products"),
-    },
-    {
-      title: "Categories",
-      href: "/admin/categories",
-      icon: "store",
-      active: segments.includes("categories"),
-    },
-    {
-      title: "Orders",
-      href: "/admin/orders",
-      icon: "cart",
-      active: segments.includes("orders"),
-    },
-    {
-      title: "Invoices",
-      href: "/admin/invoices",
-      icon: "credit",
-      active: segments.includes("invoices"),
-    },
-  ]
+  const sidebarNav = adminConfig.sidebarNav.map((item) => ({
+    ...item,
+    active:
+      item.href === "/admin"
+        ? segments.length === 0
+        : segments.includes(item.href.replace("/admin/", "")),
+  }))
 
   return (
     <aside className={cn("h-screen w-full", className)} {...props}>
@@ -62,8 +37,8 @@ export function AdminSidebar({
           href="/"
           className="flex w-fit items-center font-heading tracking-wider text-foreground/90 transition-colors hover:text-foreground"
         >
-          <Icons.logo className="mb-1 mr-2 size-7" aria-hidden="true" />
-          {siteConfig.name}
+          <SiteLogo className="h-7 w-auto" />
+          <span className="sr-only">{siteConfig.name}</span>
         </Link>
       </div>
       {children ? (

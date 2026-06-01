@@ -109,6 +109,27 @@ export function getUserEmail(user: User | null) {
   return email
 }
 
+export type ShippingAddressFields = {
+  line1?: string | null
+  line2?: string | null
+  city?: string | null
+  state?: string | null
+  postalCode?: string | null
+  country?: string | null
+}
+
+export function formatShippingAddressLines(address: ShippingAddressFields) {
+  const cityLine = [address.postalCode, address.city].filter(Boolean).join(" ")
+
+  return [
+    address.line1,
+    address.line2,
+    cityLine || null,
+    address.state,
+    address.country,
+  ].filter((line): line is string => Boolean(line?.trim()))
+}
+
 export function isMacOs() {
   if (typeof window === "undefined") return false
 

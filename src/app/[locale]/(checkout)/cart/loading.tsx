@@ -1,3 +1,5 @@
+import { getTranslations } from "next-intl/server"
+
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
@@ -10,13 +12,15 @@ import {
 } from "@/components/page-header"
 import { Shell } from "@/components/shell"
 
-export default function CartLoading() {
+export default async function CartLoading() {
+  const t = await getTranslations("Cart")
+
   return (
     <Shell>
       <PageHeader>
-        <PageHeaderHeading size="sm">Checkout</PageHeaderHeading>
+        <PageHeaderHeading size="sm">{t("pageTitle")}</PageHeaderHeading>
         <PageHeaderDescription size="sm">
-          Checkout with your cart items
+          {t("pageDescription")}
         </PageHeaderDescription>
       </PageHeader>
       <Card as="section">

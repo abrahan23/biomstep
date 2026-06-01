@@ -1,14 +1,21 @@
 import { type Metadata } from "next"
-import Link from "next/link"
 import { notFound, redirect } from "next/navigation"
+import { getTranslations } from "next-intl/server"
+import { ArrowLeftIcon } from "@radix-ui/react-icons"
 import { db } from "@/db"
-import { orders } from "@/db/schema"
+import { addresses, orders } from "@/db/schema"
 import { env } from "@/env.js"
 import { and, eq, or } from "drizzle-orm"
+import type { StripePaymentStatus } from "@/types"
 
+import { AccountOrderLineItems } from "@/components/account/account-order-line-items"
+import { OrderShippingAddress } from "@/components/account/order-shipping-address"
 import { getOrderLineItems } from "@/lib/actions/order"
+import { getStripePaymentStatusColor } from "@/lib/checkout"
 import { getCachedUser } from "@/lib/queries/user"
-import { cn, formatId, formatPrice, getUserEmail } from "@/lib/utils"
+import { Link } from "@/i18n/routing"
+import { cn, formatDate, formatId, formatPrice, getUserEmail } from "@/lib/utils"
+import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import {
   Card,
@@ -18,12 +25,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  PageHeader,
+  PageHeaderDescription,
+  PageHeaderHeading,
+} from "@/components/page-header"
 import { Shell } from "@/components/shell"
 
-export const metadata: Metadata = {
-  metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
-  title: "Order",
-  description: "View your order details",
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Account")
+
+  return {
+    metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
+    title: t("orderMetadataTitle"),
+    description: t("orderMetadataDescription"),
+  }
 }
 
 interface AccountOrderPageProps {
@@ -35,6 +51,7 @@ interface AccountOrderPageProps {
 export default async function AccountOrderPage({
   params,
 }: AccountOrderPageProps) {
+  const t = await getTranslations("Account")
   const user = await getCachedUser()
 
   if (!user) {
@@ -44,63 +61,105 @@ export default async function AccountOrderPage({
   const orderId = decodeURIComponent(params.orderId)
   const email = getUserEmail(user)
 
-  // Customers can only view their own orders (matched by user id or email).
-  const order = await db.query.orders.findFirst({
-    where: and(
-      eq(orders.id, orderId),
-      or(eq(orders.userId, user.id), eq(orders.email, email))
-    ),
-  })
+  const orderRow = await db
+    .select({
+      order: orders,
+      address: {
+        line1: addresses.line1,
+        line2: addresses.line2,
+        city: addresses.city,
+        state: addresses.state,
+        postalCode: addresses.postalCode,
+        country: addresses.country,
+      },
+    })
+    .from(orders)
+    .leftJoin(addresses, eq(orders.addressId, addresses.id))
+    .where(
+      and(
+        eq(orders.id, orderId),
+        or(eq(orders.userId, user.id), eq(orders.email, email))
+      )
+    )
+    .then((rows) => rows[0])
 
-  if (!order) {
+  if (!orderRow) {
     notFound()
   }
+
+  const order = orderRow.order
 
   const orderLineItems = await getOrderLineItems({
     items: String(order.items),
     storeId: order.storeId,
   })
 
+  const status = order.stripePaymentIntentStatus as StripePaymentStatus
+  const statusKey = `status.${status}` as `status.${StripePaymentStatus}`
+  const statusLabel = t.has(statusKey) ? t(statusKey) : status
+
   return (
     <Shell variant="sidebar">
+      <PageHeader>
+        <Link
+          href="/account"
+          className={cn(
+            buttonVariants({ variant: "ghost", size: "sm" }),
+            "mb-2 w-fit px-0 hover:bg-transparent"
+          )}
+        >
+          <ArrowLeftIcon className="mr-2 size-4" aria-hidden="true" />
+          {t("backToOrders")}
+        </Link>
+        <PageHeaderHeading size="sm">
+          {t("orderNumber", { id: formatId(order.id) })}
+        </PageHeaderHeading>
+        <PageHeaderDescription size="sm">
+          {t("orderDetailsDescription")}
+        </PageHeaderDescription>
+      </PageHeader>
       <Card>
-        <CardHeader className="space-y-1">
-          <CardTitle as="h2" className="text-2xl">
-            Order {formatId(order.id)}
-          </CardTitle>
-          <CardDescription>View your order details</CardDescription>
-        </CardHeader>
-        <CardContent className="flex w-full flex-col space-y-2.5">
-          {orderLineItems.map((item) => (
-            <Link
-              aria-label={`View ${item.name}`}
-              key={`${item.id}-${item.variant ?? ""}`}
-              href={`/product/${item.id}`}
-              className="rounded-md bg-muted px-4 py-2.5 hover:bg-muted/70"
+        <CardHeader className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <CardTitle as="h2" className="text-xl">
+              {t("orderDetails")}
+            </CardTitle>
+            <Badge
+              variant="outline"
+              className={cn(
+                "text-sm text-white",
+                getStripePaymentStatusColor({ status, shade: 600 })
+              )}
             >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex flex-col space-y-1 self-start">
-                  <span className="line-clamp-1 text-sm font-medium">
-                    {item.name}
-                  </span>
-                  {item.variant ? (
-                    <span className="line-clamp-1 text-xs font-medium text-muted-foreground">
-                      {item.variant}
-                    </span>
-                  ) : null}
-                  <span className="line-clamp-1 text-xs text-muted-foreground">
-                    Qty {item.quantity}
-                  </span>
-                </div>
-                <span className="line-clamp-1 text-sm font-medium">
-                  {formatPrice((Number(item.price) * item.quantity).toFixed(2))}
-                </span>
-              </div>
-            </Link>
-          ))}
+              {statusLabel}
+            </Badge>
+          </div>
+          <CardDescription>{formatDate(order.createdAt)}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <OrderShippingAddress
+            name={order.name}
+            email={order.email}
+            address={orderRow.address}
+            labels={{
+              title: t("shippingAddress"),
+              recipient: t("recipient"),
+              noAddress: t("noShippingAddress"),
+            }}
+          />
+          <AccountOrderLineItems
+            items={orderLineItems}
+            labels={{
+              viewProduct: (name) => t("viewProduct", { name }),
+              quantity: (count) => t("quantity", { count }),
+              each: t("each"),
+            }}
+          />
         </CardContent>
-        <CardFooter className="flex flex-wrap items-center justify-between gap-2">
-          <span className="font-medium">Total {formatPrice(order.amount)}</span>
+        <CardFooter className="flex flex-wrap items-center justify-between gap-2 border-t pt-6">
+          <span className="text-base font-semibold">
+            {t("total")} {formatPrice(order.amount)}
+          </span>
           {order.stripeInvoiceUrl ? (
             <Link
               href={order.stripeInvoiceUrl}
@@ -108,7 +167,7 @@ export default async function AccountOrderPage({
               rel="noopener noreferrer"
               className={cn(buttonVariants({ size: "sm" }))}
             >
-              View invoice
+              {t("viewInvoice")}
             </Link>
           ) : null}
         </CardFooter>

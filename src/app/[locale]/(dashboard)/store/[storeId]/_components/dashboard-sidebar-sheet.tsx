@@ -11,6 +11,7 @@ import {
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet"
+import { SiteLogo } from "@/components/site-logo"
 import { Icons } from "@/components/icons"
 
 import { useSidebar } from "@/components/layouts/sidebar-provider"
@@ -54,7 +55,8 @@ export function DashboardSidebarSheet({
             href="/"
             className="mx-6 flex items-center self-start font-heading tracking-wider text-foreground/90 transition-colors hover:text-foreground"
           >
-            <Icons.logo className="size-6" aria-hidden="true" />
+            <SiteLogo className="h-6 w-auto" />
+            <span className="sr-only">Home</span>
           </Link>
         </SheetClose>
         {children}

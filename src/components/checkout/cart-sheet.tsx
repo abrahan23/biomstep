@@ -1,19 +1,21 @@
 import { getTranslations } from "next-intl/server"
 
 import { getCart } from "@/lib/actions/cart"
-import { Link } from "@/i18n/routing"
-import { cn, formatPrice } from "@/lib/utils"
+import { formatPrice } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import {
   Sheet,
   SheetContent,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
+import {
+  CartSheetCheckoutAction,
+  CartSheetContinueShoppingAction,
+} from "@/components/checkout/cart-sheet-actions"
 import { CartLineItems } from "@/components/checkout/cart-line-items"
 import { Icons } from "@/components/icons"
 
@@ -51,7 +53,7 @@ export async function CartSheet() {
           <Icons.cart className="size-4" aria-hidden="true" />
         </Button>
       </SheetTrigger>
-      <SheetContent className="flex w-full flex-col pr-0 sm:max-w-lg">
+      <SheetContent className="flex w-full flex-col overflow-hidden pr-0 sm:max-w-lg">
         <SheetHeader className="space-y-2.5 pr-6">
           <SheetTitle>
             {t("title")} {itemCount > 0 && `(${itemCount})`}
@@ -60,8 +62,11 @@ export async function CartSheet() {
         </SheetHeader>
         {itemCount > 0 ? (
           <>
-            <CartLineItems items={cartLineItems} className="flex-1" />
-            <div className="space-y-4 pr-6">
+            <CartLineItems
+              items={cartLineItems}
+              className="min-h-0 flex-1 overflow-hidden"
+            />
+            <div className="shrink-0 space-y-4 pr-6">
               <Separator />
               <div className="space-y-1.5 text-sm">
                 <div className="flex">
@@ -77,20 +82,10 @@ export async function CartSheet() {
                   <span>{formatPrice(cartTotal.toFixed(2))}</span>
                 </div>
               </div>
-              <SheetFooter>
-                <SheetTrigger asChild>
-                  <Link
-                    aria-label={t("viewCart")}
-                    href="/cart"
-                    className={buttonVariants({
-                      size: "sm",
-                      className: "w-full",
-                    })}
-                  >
-                    {t("checkout")}
-                  </Link>
-                </SheetTrigger>
-              </SheetFooter>
+              <CartSheetCheckoutAction
+                checkoutLabel={t("checkout")}
+                viewCartLabel={t("viewCart")}
+              />
             </div>
           </>
         ) : (
@@ -102,21 +97,9 @@ export async function CartSheet() {
             <div className="text-xl font-medium text-muted-foreground">
               {t("empty")}
             </div>
-            <SheetTrigger asChild>
-              <Link
-                aria-label={t("continueShopping")}
-                href="/products"
-                className={cn(
-                  buttonVariants({
-                    variant: "link",
-                    size: "sm",
-                    className: "text-sm text-muted-foreground",
-                  })
-                )}
-              >
-                {t("continueShopping")}
-              </Link>
-            </SheetTrigger>
+            <CartSheetContinueShoppingAction
+              continueShoppingLabel={t("continueShopping")}
+            />
           </div>
         )}
       </SheetContent>

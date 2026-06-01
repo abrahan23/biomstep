@@ -2,13 +2,14 @@ import { type Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { db } from "@/db"
-import { orders } from "@/db/schema"
+import { addresses, orders } from "@/db/schema"
 import { env } from "@/env.js"
 import { and, eq } from "drizzle-orm"
 
 import { STORE_ID } from "@/config/store"
 import { getOrderLineItems } from "@/lib/actions/order"
 import { cn, formatId, formatPrice } from "@/lib/utils"
+import { OrderShippingAddress } from "@/components/account/order-shipping-address"
 import { buttonVariants } from "@/components/ui/button"
 import {
   Card,
@@ -34,13 +35,28 @@ interface OrderPageProps {
 export default async function OrderPage({ params }: OrderPageProps) {
   const orderId = decodeURIComponent(params.orderId)
 
-  const order = await db.query.orders.findFirst({
-    where: and(eq(orders.id, orderId), eq(orders.storeId, STORE_ID)),
-  })
+  const orderRow = await db
+    .select({
+      order: orders,
+      address: {
+        line1: addresses.line1,
+        line2: addresses.line2,
+        city: addresses.city,
+        state: addresses.state,
+        postalCode: addresses.postalCode,
+        country: addresses.country,
+      },
+    })
+    .from(orders)
+    .leftJoin(addresses, eq(orders.addressId, addresses.id))
+    .where(and(eq(orders.id, orderId), eq(orders.storeId, STORE_ID)))
+    .then((rows) => rows[0])
 
-  if (!order) {
+  if (!orderRow) {
     notFound()
   }
+
+  const order = orderRow.order
 
   const orderLineItems = await getOrderLineItems({
     items: String(order.items),
@@ -57,7 +73,17 @@ export default async function OrderPage({ params }: OrderPageProps) {
           {order.name} · {order.email}
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex w-full flex-col space-y-2.5">
+      <CardContent className="flex w-full flex-col space-y-6">
+        <OrderShippingAddress
+          name={order.name}
+          email={order.email}
+          address={orderRow.address}
+          labels={{
+            title: "Shipping address",
+            recipient: "Recipient",
+            noAddress: "No shipping address on file.",
+          }}
+        />
         {orderLineItems.map((item) => (
           <Link
             aria-label={`View ${item.name}`}

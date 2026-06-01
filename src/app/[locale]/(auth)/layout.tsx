@@ -2,7 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 
 import { siteConfig } from "@/config/site"
-import { Icons } from "@/components/icons"
+import { SiteLogo } from "@/components/site-logo"
 
 export default function AuthLayout({ children }: React.PropsWithChildren) {
   return (
@@ -11,8 +11,8 @@ export default function AuthLayout({ children }: React.PropsWithChildren) {
         href="/"
         className="absolute left-8 top-6 z-20 flex items-center text-lg font-bold tracking-tight text-foreground/80 transition-colors hover:text-foreground"
       >
-        <Icons.logo className="mr-2 size-6" aria-hidden="true" />
-        <span>{siteConfig.name}</span>
+        <SiteLogo className="h-10 w-auto" priority />
+        <span className="sr-only">{siteConfig.name}</span>
       </Link>
       <main className="absolute left-1/2 top-1/2 flex w-full -translate-x-1/2 -translate-y-1/2 items-center lg:static lg:left-0 lg:top-0 lg:flex lg:translate-x-0 lg:translate-y-0">
         {children}

@@ -1,15 +1,14 @@
 import { type Metadata } from "next"
-import Link from "next/link"
 import { unstable_noStore as noStore } from "next/cache"
 import { redirect } from "next/navigation"
+import { getTranslations } from "next-intl/server"
 import { db } from "@/db"
 import { orders } from "@/db/schema"
 import { env } from "@/env.js"
 import { desc, eq, or } from "drizzle-orm"
 
 import { getCachedUser } from "@/lib/queries/user"
-import { cn, formatDate, formatId, formatPrice, getUserEmail } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
+import { getUserEmail } from "@/lib/utils"
 import {
   Card,
   CardContent,
@@ -17,23 +16,28 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import {
   PageHeader,
   PageHeaderDescription,
   PageHeaderHeading,
 } from "@/components/page-header"
 import { Shell } from "@/components/shell"
+import { AccountOrdersTable } from "@/components/tables/account-orders-table"
 
-export const metadata: Metadata = {
-  metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
-  title: "My account",
-  description: "View your orders and invoices",
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Account")
+
+  return {
+    metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
+    title: t("metadataTitle"),
+    description: t("metadataDescription"),
+  }
 }
 
 export default async function AccountPage() {
   noStore()
 
+  const t = await getTranslations("Account")
   const user = await getCachedUser()
 
   if (!user) {
@@ -58,61 +62,23 @@ export default async function AccountPage() {
   return (
     <Shell variant="sidebar">
       <PageHeader>
-        <PageHeaderHeading size="sm">My orders</PageHeaderHeading>
+        <PageHeaderHeading size="sm">{t("ordersTitle")}</PageHeaderHeading>
         <PageHeaderDescription size="sm">
-          View your orders and download invoices
+          {t("ordersDescription")}
         </PageHeaderDescription>
       </PageHeader>
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">
-            {data.length} order{data.length === 1 ? "" : "s"}
+            {t("ordersCount", { count: data.length })}
           </CardTitle>
-          <CardDescription>Your purchase history</CardDescription>
+          <CardDescription>{t("purchaseHistory")}</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-2.5">
+        <CardContent>
           {data.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              You haven&apos;t placed any orders yet.
-            </p>
+            <p className="text-sm text-muted-foreground">{t("emptyOrders")}</p>
           ) : (
-            data.map((order) => (
-              <div
-                key={order.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-md bg-muted px-4 py-3"
-              >
-                <div className="flex flex-col gap-1">
-                  <Link
-                    href={`/account/orders/${order.id}`}
-                    className="text-sm font-medium hover:underline"
-                  >
-                    Order {formatId(order.id)}
-                  </Link>
-                  <span className="text-xs text-muted-foreground">
-                    {formatDate(order.createdAt)} · {order.quantity ?? 0} item
-                    {order.quantity === 1 ? "" : "s"}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Badge variant="outline" className="capitalize">
-                    {order.status}
-                  </Badge>
-                  <span className="text-sm font-medium">
-                    {formatPrice(order.amount)}
-                  </span>
-                  {order.invoiceUrl ? (
-                    <Link
-                      href={order.invoiceUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={cn(buttonVariants({ size: "sm" }))}
-                    >
-                      Invoice
-                    </Link>
-                  ) : null}
-                </div>
-              </div>
-            ))
+            <AccountOrdersTable orders={data} />
           )}
         </CardContent>
       </Card>

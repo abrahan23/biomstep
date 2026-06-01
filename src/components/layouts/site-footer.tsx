@@ -1,7 +1,7 @@
+import { Link } from "@/i18n/routing"
 import { getTranslations } from "next-intl/server"
 
 import { siteConfig } from "@/config/site"
-import { Link } from "@/i18n/routing"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 import { Icons } from "@/components/icons"
@@ -9,6 +9,7 @@ import { JoinNewsletterForm } from "@/components/join-newsletter-form"
 import { LocaleSwitcher } from "@/components/layouts/locale-switcher"
 import { ModeToggle } from "@/components/layouts/mode-toggle"
 import { Shell } from "@/components/shell"
+import { SiteLogo } from "@/components/site-logo"
 
 export async function SiteFooter() {
   const t = await getTranslations("Footer")
@@ -39,9 +40,9 @@ export async function SiteFooter() {
       <Shell>
         <section className="flex flex-col gap-10 lg:flex-row lg:gap-20">
           <section className="space-y-4">
-            <Link href="/" className="flex w-fit items-center space-x-2">
-              <Icons.logo className="size-6" aria-hidden="true" />
-              <span className="font-bold">{siteConfig.name}</span>
+            <Link href="/" className="flex w-fit items-center">
+              <SiteLogo className="h-20 w-auto" />
+              <span className="sr-only">{siteConfig.name}</span>
               <span className="sr-only">{tCommon("home")}</span>
             </Link>
             <LocaleSwitcher />
@@ -77,13 +78,13 @@ export async function SiteFooter() {
           <div className="flex-1 text-left text-sm leading-loose text-muted-foreground">
             {t("builtBy")}{" "}
             <Link
-              href="https://twitter.com/sadmann17"
+              href="https://softwarecompote.com"
               target="_blank"
               rel="noreferrer"
               className="font-semibold transition-colors hover:text-foreground"
             >
-              Sadman
-              <span className="sr-only">Twitter</span>
+              Software Compote LLC
+              <span className="sr-only">Software Compote LLC</span>
             </Link>
             .
           </div>

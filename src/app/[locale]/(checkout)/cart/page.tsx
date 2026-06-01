@@ -1,8 +1,9 @@
 import type { Metadata } from "next"
-import Link from "next/link"
+import { getTranslations } from "next-intl/server"
 import { env } from "@/env.js"
 
 import { getUniqueStoreIds } from "@/lib/actions/cart"
+import { Link } from "@/i18n/routing"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 import { CheckoutCard } from "@/components/checkout/checkout-card"
@@ -14,13 +15,18 @@ import {
 } from "@/components/page-header"
 import { Shell } from "@/components/shell"
 
-export const metadata: Metadata = {
-  metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
-  title: "Cart",
-  description: "Checkout with your cart items",
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Cart")
+
+  return {
+    metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
+    title: t("pageMetadataTitle"),
+    description: t("pageMetadataDescription"),
+  }
 }
 
 export default async function CartPage() {
+  const t = await getTranslations("Cart")
   const uniqueStoreIds = await getUniqueStoreIds()
 
   return (
@@ -29,9 +35,9 @@ export default async function CartPage() {
         id="cart-page-header"
         aria-labelledby="cart-page-header-heading"
       >
-        <PageHeaderHeading size="sm">Checkout</PageHeaderHeading>
+        <PageHeaderHeading size="sm">{t("pageTitle")}</PageHeaderHeading>
         <PageHeaderDescription size="sm">
-          Checkout with your cart items
+          {t("pageDescription")}
         </PageHeaderDescription>
       </PageHeader>
       {uniqueStoreIds.length > 0 ? (
@@ -50,10 +56,10 @@ export default async function CartPage() {
             aria-hidden="true"
           />
           <div className="text-xl font-medium text-muted-foreground">
-            Your cart is empty
+            {t("empty")}
           </div>
           <Link
-            aria-label="Add items to your cart to checkout"
+            aria-label={t("emptyCheckout")}
             href="/products"
             className={cn(
               buttonVariants({
@@ -63,7 +69,7 @@ export default async function CartPage() {
               })
             )}
           >
-            Add items to your cart to checkout
+            {t("emptyCheckout")}
           </Link>
         </section>
       )}
