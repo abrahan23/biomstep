@@ -1,8 +1,8 @@
-import * as React from "react"
-import Link from "next/link"
+import { getTranslations } from "next-intl/server"
 import type { User } from "@clerk/nextjs/server"
 import { DashboardIcon, ExitIcon, GearIcon } from "@radix-ui/react-icons"
 
+import { Link } from "@/i18n/routing"
 import { isAdmin } from "@/lib/auth"
 import { cn, getUserEmail } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -20,7 +20,7 @@ import {
 import { Icons } from "@/components/icons"
 
 interface AuthDropdownProps
-  extends React.ComponentPropsWithRef<typeof DropdownMenuTrigger>,
+  extends React.ComponentPropsWithoutRef<typeof DropdownMenuTrigger>,
     ButtonProps {
   user: User | null
 }
@@ -30,12 +30,14 @@ export async function AuthDropdown({
   className,
   ...props
 }: AuthDropdownProps) {
+  const t = await getTranslations("Auth")
+
   if (!user) {
     return (
       <Button size="sm" className={cn(className)} {...props} asChild>
         <Link href="/signin">
-          Sign In
-          <span className="sr-only">Sign In</span>
+          {t("signIn")}
+          <span className="sr-only">{t("signInSr")}</span>
         </Link>
       </Button>
     )
@@ -78,7 +80,7 @@ export async function AuthDropdown({
             <DropdownMenuItem asChild>
               <Link href="/admin">
                 <DashboardIcon className="mr-2 size-4" aria-hidden="true" />
-                Admin
+                {t("admin")}
                 <DropdownMenuShortcut>⌘D</DropdownMenuShortcut>
               </Link>
             </DropdownMenuItem>
@@ -86,14 +88,14 @@ export async function AuthDropdown({
           <DropdownMenuItem asChild>
             <Link href="/account">
               <Icons.dollarSign className="mr-2 size-4" aria-hidden="true" />
-              My orders
+              {t("myOrders")}
               <DropdownMenuShortcut>⌘O</DropdownMenuShortcut>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/dashboard/account">
               <GearIcon className="mr-2 size-4" aria-hidden="true" />
-              Account
+              {t("account")}
               <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
             </Link>
           </DropdownMenuItem>
@@ -102,7 +104,7 @@ export async function AuthDropdown({
         <DropdownMenuItem asChild>
           <Link href="/signout">
             <ExitIcon className="mr-2 size-4" aria-hidden="true" />
-            Log out
+            {t("logOut")}
             <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
           </Link>
         </DropdownMenuItem>

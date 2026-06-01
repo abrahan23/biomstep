@@ -1,6 +1,7 @@
-import Link from "next/link"
+import { getTranslations } from "next-intl/server"
 
 import { getCart } from "@/lib/actions/cart"
+import { Link } from "@/i18n/routing"
 import { cn, formatPrice } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -17,6 +18,7 @@ import { CartLineItems } from "@/components/checkout/cart-line-items"
 import { Icons } from "@/components/icons"
 
 export async function CartSheet() {
+  const t = await getTranslations("Cart")
   const cartLineItems = await getCart()
 
   const itemCount = cartLineItems.reduce(
@@ -33,7 +35,7 @@ export async function CartSheet() {
     <Sheet>
       <SheetTrigger asChild>
         <Button
-          aria-label="Open cart"
+          aria-label={t("openCart")}
           variant="outline"
           size="icon"
           className="relative"
@@ -51,7 +53,9 @@ export async function CartSheet() {
       </SheetTrigger>
       <SheetContent className="flex w-full flex-col pr-0 sm:max-w-lg">
         <SheetHeader className="space-y-2.5 pr-6">
-          <SheetTitle>Cart {itemCount > 0 && `(${itemCount})`}</SheetTitle>
+          <SheetTitle>
+            {t("title")} {itemCount > 0 && `(${itemCount})`}
+          </SheetTitle>
           <Separator />
         </SheetHeader>
         {itemCount > 0 ? (
@@ -61,29 +65,29 @@ export async function CartSheet() {
               <Separator />
               <div className="space-y-1.5 text-sm">
                 <div className="flex">
-                  <span className="flex-1">Shipping</span>
-                  <span>Free</span>
+                  <span className="flex-1">{t("shipping")}</span>
+                  <span>{t("free")}</span>
                 </div>
                 <div className="flex">
-                  <span className="flex-1">Taxes</span>
-                  <span>Calculated at checkout</span>
+                  <span className="flex-1">{t("taxes")}</span>
+                  <span>{t("taxesNote")}</span>
                 </div>
                 <div className="flex">
-                  <span className="flex-1">Total</span>
+                  <span className="flex-1">{t("total")}</span>
                   <span>{formatPrice(cartTotal.toFixed(2))}</span>
                 </div>
               </div>
               <SheetFooter>
                 <SheetTrigger asChild>
                   <Link
-                    aria-label="View your cart"
+                    aria-label={t("viewCart")}
                     href="/cart"
                     className={buttonVariants({
                       size: "sm",
                       className: "w-full",
                     })}
                   >
-                    Continue to checkout
+                    {t("checkout")}
                   </Link>
                 </SheetTrigger>
               </SheetFooter>
@@ -96,11 +100,11 @@ export async function CartSheet() {
               aria-hidden="true"
             />
             <div className="text-xl font-medium text-muted-foreground">
-              Your cart is empty
+              {t("empty")}
             </div>
             <SheetTrigger asChild>
               <Link
-                aria-label="Add items to your cart to checkout"
+                aria-label={t("continueShopping")}
                 href="/products"
                 className={cn(
                   buttonVariants({
@@ -110,7 +114,7 @@ export async function CartSheet() {
                   })
                 )}
               >
-                Add items to your cart to checkout
+                {t("continueShopping")}
               </Link>
             </SheetTrigger>
           </div>

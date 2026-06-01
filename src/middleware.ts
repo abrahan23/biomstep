@@ -1,30 +1,40 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
+import createMiddleware from "next-intl/middleware"
 
-// Routes that require authentication. Admin-role enforcement for /admin is
-// handled in the admin layout via the user's Clerk public metadata, since the
-// role lives in metadata rather than the edge session token by default.
+import { routing } from "@/i18n/routing"
+
+const handleI18nRouting = createMiddleware(routing)
+
 const isProtectedRoute = createRouteMatcher([
-  "/admin(.*)",
-  "/account(.*)",
-  "/checkout(.*)",
-  "/cart(.*)",
+  "/(es|en)/admin(.*)",
+  "/(es|en)/account(.*)",
+  "/(es|en)/checkout(.*)",
+  "/(es|en)/cart(.*)",
 ])
 
+function getLocaleFromPathname(pathname: string) {
+  const segment = pathname.split("/")[1]
+  return routing.locales.includes(segment as (typeof routing.locales)[number])
+    ? segment
+    : routing.defaultLocale
+}
+
 export default clerkMiddleware((auth, req) => {
-  // UploadThing handles its own auth in the file router middleware and
-  // receives dev callbacks on this route — Clerk must not block it.
   if (req.nextUrl.pathname.startsWith("/api/uploadthing")) {
     return
   }
 
   if (isProtectedRoute(req)) {
-    const url = new URL(req.nextUrl.origin)
+    const locale = getLocaleFromPathname(req.nextUrl.pathname)
+    const origin = req.nextUrl.origin
 
     auth().protect({
-      unauthenticatedUrl: `${url.origin}/signin`,
-      unauthorizedUrl: `${url.origin}/`,
+      unauthenticatedUrl: `${origin}/${locale}/signin`,
+      unauthorizedUrl: `${origin}/${locale}/`,
     })
   }
+
+  return handleI18nRouting(req)
 })
 
 export const config = {

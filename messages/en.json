@@ -1,0 +1,163 @@
+{
+  "Metadata": {
+    "title": "Biomstep",
+    "description": "The official BIOMSTEP store."
+  },
+  "Common": {
+    "home": "Home",
+    "storeDescription": "The official BIOMSTEP store.",
+    "all": "All",
+    "product": "product",
+    "products": "products",
+    "starsRating": "{rating} out of 5 stars"
+  },
+  "Navigation": {
+    "blog": "Blog",
+    "blogAll": "All",
+    "blogDescription": "BIOMSTEP blog.",
+    "blogSurgery": "Surgery",
+    "blogSurgeryDescription": "Foot surgery."
+  },
+  "Auth": {
+    "signIn": "Sign in",
+    "signInSr": "Sign in",
+    "admin": "Admin",
+    "myOrders": "My orders",
+    "account": "Account",
+    "logOut": "Log out"
+  },
+  "Cart": {
+    "openCart": "Open cart",
+    "title": "Cart",
+    "shipping": "Shipping",
+    "free": "Free",
+    "taxes": "Taxes",
+    "taxesNote": "Calculated at checkout",
+    "total": "Total",
+    "viewCart": "View cart",
+    "continueShopping": "Continue shopping",
+    "empty": "Your cart is empty",
+    "checkout": "Checkout"
+  },
+  "Product": {
+    "addToCart": "Add to cart",
+    "added": "Added",
+    "removeFromCart": "Remove from cart",
+    "preview": "Preview"
+  },
+  "Footer": {
+    "newsletterTitle": "Subscribe to our newsletter",
+    "builtBy": "Built by",
+    "credits": "Credits",
+    "help": "Help",
+    "social": "Social",
+    "about": "About",
+    "contact": "Contact",
+    "terms": "Terms",
+    "privacy": "Privacy"
+  },
+  "Home": {
+    "hero": {
+      "ariaLabel": "BIOMSTEP presentation",
+      "badge": "Podiatry · Sports · Anatomy",
+      "title": "Care for every step with clinical precision",
+      "description": "Custom insoles, sports protection, and 3D-printed anatomical models. BIOMSTEP technology for a healthier stride.",
+      "primaryCta": "Browse catalog",
+      "secondaryCta": "Explore categories",
+      "scrollHint": "Scroll to the end of the video",
+      "scrollComplete": "Keep scrolling to explore the store",
+      "layers": {
+        "anatomy": "Anatomy",
+        "insole": "Insoles",
+        "footwear": "Sports"
+      }
+    },
+    "sections": {
+      "categories": {
+        "eyebrow": "Catalog",
+        "title": "Main categories",
+        "description": "Find the right solution for your gait, sport, or clinic.",
+        "viewAll": "View all categories"
+      },
+      "bestSellers": {
+        "eyebrow": "Top sellers",
+        "title": "Best-selling products",
+        "description": "What our customers choose most for comfort and performance.",
+        "linkText": "View best sellers"
+      },
+      "benefits": {
+        "eyebrow": "Why BIOMSTEP",
+        "title": "BIOMSTEP benefits",
+        "description": "We combine podiatric expertise, quality materials, and advanced manufacturing.",
+        "items": [
+          {
+            "title": "Gait analysis",
+            "description": "Insoles designed to correct support, reduce overload, and improve biomechanics with every step."
+          },
+          {
+            "title": "Sports performance",
+            "description": "Sports insoles and protection that absorb impact without losing feel or stability."
+          },
+          {
+            "title": "Anatomical precision",
+            "description": "3D reference models for training, planning, and patient communication."
+          },
+          {
+            "title": "Certified quality",
+            "description": "Durable materials, controlled processes, and secure home delivery with protected payment."
+          }
+        ]
+      },
+      "testimonials": {
+        "eyebrow": "Clinical trust",
+        "title": "Reviews",
+        "description": "Professionals and athletes who trust BIOMSTEP.",
+        "items": [
+          {
+            "quote": "Sports insoles changed how my feet feel on runs. Less metatarsal fatigue and better stability on landing.",
+            "author": "Laura M.",
+            "role": "Amateur runner"
+          },
+          {
+            "quote": "Anatomical foot models are an excellent tool for explaining procedures to my patients.",
+            "author": "Dr. García",
+            "role": "Clinical podiatrist"
+          },
+          {
+            "quote": "I bought insoles for hospitality work and the comfort on long standing shifts was noticeable from week one.",
+            "author": "Carlos R.",
+            "role": "BIOMSTEP customer"
+          }
+        ]
+      },
+      "faq": {
+        "eyebrow": "Help",
+        "title": "Quick FAQ",
+        "description": "Answers to the most common questions before you buy.",
+        "items": [
+          {
+            "question": "How do I choose the right insole?",
+            "answer": "Pick a category based on your use (sport, work, everyday, or kids). Each product page includes details and recommendations. For clinical questions, consult your podiatrist."
+          },
+          {
+            "question": "How long does shipping take?",
+            "answer": "We process orders within 1–2 business days. You'll receive tracking by email once your order leaves our warehouse."
+          },
+          {
+            "question": "Can I return a product?",
+            "answer": "Yes, you have 14 days to return unused, non-customized products. See our returns policy for details."
+          },
+          {
+            "question": "Are anatomical models for clinical use?",
+            "answer": "They are intended as visual and educational aids. They do not replace individual diagnosis or surgical planning."
+          }
+        ]
+      }
+    }
+  },
+  "Search": {
+    "placeholder": "Search products…",
+    "empty": "No products found.",
+    "shortcut": "Search"
+  }
+}

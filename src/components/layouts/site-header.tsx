@@ -3,6 +3,7 @@ import type { User } from "@clerk/nextjs/server"
 
 import { CartSheet } from "@/components/checkout/cart-sheet"
 import { AuthDropdown } from "@/components/layouts/auth-dropdown"
+import { LocaleSwitcher } from "@/components/layouts/locale-switcher"
 import { MainNav } from "@/components/layouts/main-nav"
 import { MobileNav } from "@/components/layouts/mobile-nav"
 import { ProductsCombobox } from "@/components/products-combobox"
@@ -20,6 +21,7 @@ export function SiteHeader({ user, mainNav }: SiteHeaderProps) {
         <MobileNav items={mainNav} />
         <div className="flex flex-1 items-center justify-end space-x-4">
           <nav className="flex items-center space-x-2">
+            <LocaleSwitcher className="hidden sm:flex" />
             <ProductsCombobox />
             <CartSheet />
             <AuthDropdown user={user} />

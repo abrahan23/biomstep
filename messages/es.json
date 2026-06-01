@@ -1,0 +1,163 @@
+{
+  "Metadata": {
+    "title": "Biomstep",
+    "description": "La tienda oficial de BIOMSTEP."
+  },
+  "Common": {
+    "home": "Inicio",
+    "storeDescription": "La tienda oficial de BIOMSTEP.",
+    "all": "Todos",
+    "product": "producto",
+    "products": "productos",
+    "starsRating": "{rating} de 5 estrellas"
+  },
+  "Navigation": {
+    "blog": "Blog",
+    "blogAll": "Todos",
+    "blogDescription": "Blog de BIOMSTEP.",
+    "blogSurgery": "Cirugía",
+    "blogSurgeryDescription": "Cirugía de pie."
+  },
+  "Auth": {
+    "signIn": "Iniciar sesión",
+    "signInSr": "Iniciar sesión",
+    "admin": "Admin",
+    "myOrders": "Mis pedidos",
+    "account": "Cuenta",
+    "logOut": "Cerrar sesión"
+  },
+  "Cart": {
+    "openCart": "Abrir carrito",
+    "title": "Carrito",
+    "shipping": "Envío",
+    "free": "Gratis",
+    "taxes": "Impuestos",
+    "taxesNote": "Calculados en el checkout",
+    "total": "Total",
+    "viewCart": "Ver carrito",
+    "continueShopping": "Seguir comprando",
+    "empty": "Tu carrito está vacío",
+    "checkout": "Finalizar compra"
+  },
+  "Product": {
+    "addToCart": "Añadir al carrito",
+    "added": "Añadido",
+    "removeFromCart": "Quitar del carrito",
+    "preview": "Vista previa"
+  },
+  "Footer": {
+    "newsletterTitle": "Suscríbete a nuestra newsletter",
+    "builtBy": "Desarrollado por",
+    "credits": "Créditos",
+    "help": "Ayuda",
+    "social": "Social",
+    "about": "Sobre nosotros",
+    "contact": "Contacto",
+    "terms": "Términos",
+    "privacy": "Privacidad"
+  },
+  "Home": {
+    "hero": {
+      "ariaLabel": "Presentación BIOMSTEP",
+      "badge": "Podología · Deporte · Anatomía",
+      "title": "Cuida cada paso con precisión clínica",
+      "description": "Plantillas personalizadas, protección deportiva y modelos anatómicos impresos en 3D. Tecnología BIOMSTEP para una pisada más saludable.",
+      "primaryCta": "Ver catálogo",
+      "secondaryCta": "Explorar categorías",
+      "scrollHint": "Desplázate hasta el final del vídeo",
+      "scrollComplete": "Sigue bajando para ver la tienda",
+      "layers": {
+        "anatomy": "Anatomía",
+        "insole": "Plantillas",
+        "footwear": "Deporte"
+      }
+    },
+    "sections": {
+      "categories": {
+        "eyebrow": "Catálogo",
+        "title": "Categorías principales",
+        "description": "Encuentra la solución adecuada para tu pisada, tu deporte o tu clínica.",
+        "viewAll": "Ver todas las categorías"
+      },
+      "bestSellers": {
+        "eyebrow": "Top ventas",
+        "title": "Productos más vendidos",
+        "description": "Lo que más eligen nuestros clientes para mejorar confort y rendimiento.",
+        "linkText": "Ver más vendidos"
+      },
+      "benefits": {
+        "eyebrow": "Por qué BIOMSTEP",
+        "title": "Beneficios BIOMSTEP",
+        "description": "Combinamos conocimiento podológico, materiales de calidad y fabricación avanzada.",
+        "items": [
+          {
+            "title": "Análisis de pisada",
+            "description": "Plantillas diseñadas para corregir apoyos, reducir sobrecarga y mejorar la biomecánica en cada paso."
+          },
+          {
+            "title": "Rendimiento deportivo",
+            "description": "Protecciones y plantillas deportivas que absorben impacto sin perder sensibilidad ni estabilidad."
+          },
+          {
+            "title": "Precisión anatómica",
+            "description": "Modelos 3D de referencia clínica para formación, planificación y comunicación con el paciente."
+          },
+          {
+            "title": "Calidad certificada",
+            "description": "Materiales duraderos, procesos controlados y envío seguro a domicilio con pago protegido."
+          }
+        ]
+      },
+      "testimonials": {
+        "eyebrow": "Confianza clínica",
+        "title": "Opiniones",
+        "description": "Profesionales y deportistas que confían en BIOMSTEP.",
+        "items": [
+          {
+            "quote": "Las plantillas deportivas cambiaron mi sensación en carrera. Menos fatiga en metatarsos y mejor estabilidad en apoyo.",
+            "author": "Laura M.",
+            "role": "Corredora amateur"
+          },
+          {
+            "quote": "Los modelos anatómicos de pie son una herramienta excelente para explicar procedimientos a mis pacientes.",
+            "author": "Dr. García",
+            "role": "Podólogo clínico"
+          },
+          {
+            "quote": "Compré plantillas para hostelería y el confort en jornadas largas de pie es notable desde la primera semana.",
+            "author": "Carlos R.",
+            "role": "Cliente BIOMSTEP"
+          }
+        ]
+      },
+      "faq": {
+        "eyebrow": "Ayuda",
+        "title": "FAQ rápida",
+        "description": "Respuestas a las dudas más habituales antes de comprar.",
+        "items": [
+          {
+            "question": "¿Cómo elijo la plantilla adecuada?",
+            "answer": "Revisa la categoría según tu uso (deporte, trabajo, descanso o infantil). Cada ficha incluye descripción y recomendaciones. Si tienes dudas clínicas, consulta con tu podólogo."
+          },
+          {
+            "question": "¿Cuánto tarda el envío?",
+            "answer": "Procesamos los pedidos en 24–48 h laborables. Recibirás el seguimiento por email en cuanto salga de nuestro almacén."
+          },
+          {
+            "question": "¿Puedo devolver un producto?",
+            "answer": "Sí, dispones de 14 días para devoluciones en productos sin uso personalizado. Consulta nuestra política de devoluciones para más detalle."
+          },
+          {
+            "question": "¿Los modelos anatómicos son para uso clínico?",
+            "answer": "Están pensados como apoyo visual y formativo. No sustituyen diagnóstico ni planificación quirúrgica individual."
+          }
+        ]
+      }
+    }
+  },
+  "Search": {
+    "placeholder": "Buscar productos…",
+    "empty": "No se encontraron productos.",
+    "shortcut": "Buscar"
+  }
+}

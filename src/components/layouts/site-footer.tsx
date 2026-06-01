@@ -1,27 +1,53 @@
-import Link from "next/link"
+import { getTranslations } from "next-intl/server"
 
 import { siteConfig } from "@/config/site"
+import { Link } from "@/i18n/routing"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 import { Icons } from "@/components/icons"
 import { JoinNewsletterForm } from "@/components/join-newsletter-form"
+import { LocaleSwitcher } from "@/components/layouts/locale-switcher"
 import { ModeToggle } from "@/components/layouts/mode-toggle"
 import { Shell } from "@/components/shell"
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const t = await getTranslations("Footer")
+  const tCommon = await getTranslations("Common")
+
+  const footerSections = [
+    {
+      title: t("credits"),
+      items: siteConfig.footerNav[0]?.items ?? [],
+    },
+    {
+      title: t("help"),
+      items: [
+        { title: t("about"), href: "/about", external: false },
+        { title: t("contact"), href: "/contact", external: false },
+        { title: t("terms"), href: "/terms", external: false },
+        { title: t("privacy"), href: "/privacy", external: false },
+      ],
+    },
+    {
+      title: t("social"),
+      items: siteConfig.footerNav[2]?.items ?? [],
+    },
+  ]
+
   return (
     <footer className="w-full border-t bg-background">
       <Shell>
         <section className="flex flex-col gap-10 lg:flex-row lg:gap-20">
-          <section>
+          <section className="space-y-4">
             <Link href="/" className="flex w-fit items-center space-x-2">
               <Icons.logo className="size-6" aria-hidden="true" />
               <span className="font-bold">{siteConfig.name}</span>
-              <span className="sr-only">Home</span>
+              <span className="sr-only">{tCommon("home")}</span>
             </Link>
+            <LocaleSwitcher />
           </section>
-          <section className="grid flex-1 grid-cols-1 gap-10 xxs:grid-cols-2 sm:grid-cols-4">
-            {siteConfig.footerNav.map((item) => (
+          <section className="grid flex-1 grid-cols-1 gap-10 xxs:grid-cols-2 sm:grid-cols-3">
+            {footerSections.map((item) => (
               <div key={item.title} className="space-y-3">
                 <h4 className="text-base font-medium">{item.title}</h4>
                 <ul className="space-y-2.5">
@@ -43,15 +69,13 @@ export function SiteFooter() {
             ))}
           </section>
           <section className="space-y-3">
-            <h4 className="text-base font-medium">
-              Subscribe to our newsletter
-            </h4>
+            <h4 className="text-base font-medium">{t("newsletterTitle")}</h4>
             <JoinNewsletterForm />
           </section>
         </section>
         <section className="flex items-center space-x-4">
           <div className="flex-1 text-left text-sm leading-loose text-muted-foreground">
-            Built by{" "}
+            {t("builtBy")}{" "}
             <Link
               href="https://twitter.com/sadmann17"
               target="_blank"

@@ -1,13 +1,15 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
+import { Link } from "@/i18n/routing"
 import { useSelectedLayoutSegment } from "next/navigation"
 import type { MainNavItem } from "@/types"
 
 import { siteConfig } from "@/config/site"
+import { Link } from "@/i18n/routing"
 import { cn } from "@/lib/utils"
 import { useMediaQuery } from "@/hooks/use-media-query"
+import { LocaleSwitcher } from "@/components/layouts/locale-switcher"
 import {
   Accordion,
   AccordionContent,
@@ -43,7 +45,7 @@ export function MobileNav({ items }: MobileNavProps) {
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="pl-1 pr-0 pt-9">
-        <div className="w-full px-7">
+        <div className="flex w-full items-center justify-between px-7">
           <Link
             href="/"
             className="flex items-center"
@@ -53,6 +55,7 @@ export function MobileNav({ items }: MobileNavProps) {
             <span className="font-bold">{siteConfig.name}</span>
             <span className="sr-only">Home</span>
           </Link>
+          <LocaleSwitcher />
         </div>
         <ScrollArea className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
           <div className="pl-1 pr-7">

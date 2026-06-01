@@ -2,12 +2,13 @@
 
 import * as React from "react"
 import Image from "next/image"
-import Link from "next/link"
+import { useTranslations } from "next-intl"
 import { type Product } from "@/db/schema"
 import { CheckIcon, EyeOpenIcon, PlusIcon } from "@radix-ui/react-icons"
 import { toast } from "sonner"
 
 import { addToCart } from "@/lib/actions/cart"
+import { Link } from "@/i18n/routing"
 import { cn, formatPrice } from "@/lib/utils"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -39,6 +40,7 @@ export function ProductCard({
   className,
   ...props
 }: ProductCardProps) {
+  const t = useTranslations("Product")
   const [isUpdatePending, startUpdateTransition] = React.useTransition()
 
   return (
@@ -79,7 +81,7 @@ export function ProductCard({
         {variant === "default" ? (
           <div className="flex w-full items-center space-x-2">
             <Button
-              aria-label="Add to cart"
+              aria-label={t("addToCart")}
               size="sm"
               className="h-8 w-full rounded-sm"
               onClick={async () => {
@@ -101,11 +103,11 @@ export function ProductCard({
                   aria-hidden="true"
                 />
               )}
-              Add to cart
+              {t("addToCart")}
             </Button>
             <Link
               href={`/preview/product/${product.id}`}
-              title="Preview"
+              title={t("preview")}
               className={cn(
                 buttonVariants({
                   variant: "secondary",
@@ -115,12 +117,12 @@ export function ProductCard({
               )}
             >
               <EyeOpenIcon className="size-4" aria-hidden="true" />
-              <span className="sr-only">Preview</span>
+              <span className="sr-only">{t("preview")}</span>
             </Link>
           </div>
         ) : (
           <Button
-            aria-label={isAddedToCart ? "Remove from cart" : "Add to cart"}
+            aria-label={isAddedToCart ? t("removeFromCart") : t("addToCart")}
             size="sm"
             className="h-8 w-full rounded-sm"
             onClick={async () => {
@@ -139,7 +141,7 @@ export function ProductCard({
             ) : (
               <PlusIcon className="mr-2 size-4" aria-hidden="true" />
             )}
-            {isAddedToCart ? "Added" : "Add to cart"}
+            {isAddedToCart ? t("added") : t("addToCart")}
           </Button>
         )}
       </CardFooter>
