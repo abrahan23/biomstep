@@ -1,10 +1,15 @@
 import type { Metadata } from "next"
+import { notFound } from "next/navigation"
 import { env } from "@/env.js"
+import type { SearchParams } from "@/types"
 
-import { getProducts } from "@/lib/queries/product"
-import { getStores } from "@/lib/queries/store"
-import { toTitleCase, unslugify } from "@/lib/utils"
-import { productsSearchParamsSchema } from "@/lib/validations/params"
+import {
+  getCategoryBySlug,
+  getProducts,
+  getSubcategoriesByCategory,
+  getSubcategoryBySlug,
+} from "@/lib/queries/product"
+import { toTitleCase } from "@/lib/utils"
 import {
   PageHeader,
   PageHeaderDescription,
@@ -18,13 +23,11 @@ interface SubcategoryPageProps {
     category: string
     subcategory: string
   }
-  searchParams: {
-    [key: string]: string | string[] | undefined
-  }
+  searchParams: SearchParams
 }
 
 export function generateMetadata({ params }: SubcategoryPageProps): Metadata {
-  const subcategory = unslugify(params.subcategory)
+  const subcategory = decodeURIComponent(params.subcategory)
 
   return {
     metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
@@ -37,41 +40,47 @@ export default async function SubcategoryPage({
   params,
   searchParams,
 }: SubcategoryPageProps) {
-  const { category, subcategory } = params
-  const { page, per_page, sort, price_range, store_ids, store_page, active } =
-    productsSearchParamsSchema.parse(searchParams)
+  const categorySlug = decodeURIComponent(params.category)
+  const subcategorySlug = decodeURIComponent(params.subcategory)
 
-  // Products transaction
-  const limit = typeof per_page === "string" ? parseInt(per_page) : 8
-  const offset = typeof page === "string" ? (parseInt(page) - 1) * limit : 0
+  const [category, subcategory] = await Promise.all([
+    getCategoryBySlug({ slug: categorySlug }),
+    getSubcategoryBySlug({ slug: subcategorySlug }),
+  ])
 
-  const productsTransaction = await getProducts(searchParams)
+  if (!category || !subcategory || subcategory.categoryId !== category.id) {
+    notFound()
+  }
 
-  // Stores transaction
-  const storesLimit = 25
-  const storesOffset =
-    typeof store_page === "string"
-      ? (parseInt(store_page) - 1) * storesLimit
-      : 0
+  const productsTransaction = await getProducts({
+    ...searchParams,
+    categories: category.id,
+    subcategories: subcategory.id,
+  })
 
-  const storesTransaction = await getStores(searchParams)
+  const subcategories = await getSubcategoriesByCategory({
+    categoryId: category.id,
+  })
 
   return (
     <Shell>
       <PageHeader>
         <PageHeaderHeading size="sm">
-          {toTitleCase(unslugify(subcategory))}
+          {toTitleCase(subcategory.name)}
         </PageHeaderHeading>
         <PageHeaderDescription size="sm">
-          {`Buy the best ${unslugify(subcategory)}`}
+          {subcategory.description ?? `Buy the best ${subcategory.name}`}
         </PageHeaderDescription>
       </PageHeader>
-      {/* <Products
+      <Products
         products={productsTransaction.data}
         pageCount={productsTransaction.pageCount}
-        stores={storesTransaction.data}
-        storePageCount={storesTransaction.pageCount}
-      /> */}
+        collectionName={subcategory.name}
+        parentCategoryHref={`/collections/${category.slug}`}
+        parentCategoryName={category.name}
+        category={category}
+        subcategories={subcategories}
+      />
     </Shell>
   )
 }

@@ -4,7 +4,7 @@ import { unstable_noStore as noStore, revalidatePath } from "next/cache"
 import { cookies } from "next/headers"
 import { db } from "@/db"
 import { carts, categories, products, stores, subcategories } from "@/db/schema"
-import { and, asc, desc, eq, inArray, sql } from "drizzle-orm"
+import { and, asc, desc, eq, inArray } from "drizzle-orm"
 import { type z } from "zod"
 
 import { getErrorMessage } from "@/lib/handle-error"
@@ -38,7 +38,7 @@ export async function getCart(input?: {
 
     const uniqueProductIds = [...new Set(productIds)]
 
-    const cartLineItems = await db
+    const productRows = await db
       .select({
         id: products.id,
         name: products.name,
@@ -61,21 +61,29 @@ export async function getCart(input?: {
           input?.storeId ? eq(products.storeId, input.storeId) : undefined
         )
       )
-      .groupBy(products.id)
       .orderBy(desc(stores.stripeAccountId), asc(products.createdAt))
       .execute()
-      .then((items) => {
-        return items.map((item) => {
-          const quantity = cart?.items?.find(
-            (cartItem) => cartItem.productId === item.id
-          )?.quantity
 
-          return {
-            ...item,
-            quantity: quantity ?? 0,
-          }
-        })
-      })
+    const productById = new Map(productRows.map((row) => [row.id, row]))
+
+    // Map over the raw cart items so each variant selection of a product is its
+    // own line, preserving the order in which they were added.
+    const cartLineItems = (cart?.items ?? []).flatMap((cartItem) => {
+      const product = productById.get(cartItem.productId)
+
+      if (!product) return []
+
+      return [
+        {
+          ...product,
+          // Use the selected variant's unit price when present.
+          price: cartItem.price != null ? String(cartItem.price) : product.price,
+          variant: cartItem.variant ?? null,
+          skuId: cartItem.skuId ?? null,
+          quantity: cartItem.quantity ?? 0,
+        },
+      ]
+    })
 
     return cartLineItems
   } catch (err) {
@@ -91,19 +99,25 @@ export async function getUniqueStoreIds() {
   if (!cartId) return []
 
   try {
-    const cart = await db
+    const cart = await db.query.carts.findFirst({
+      columns: {
+        items: true,
+      },
+      where: eq(carts.id, cartId),
+    })
+
+    const productIds = [
+      ...new Set((cart?.items ?? []).map((item) => item.productId)),
+    ]
+
+    if (productIds.length === 0) return []
+
+    const rows = await db
       .selectDistinct({ storeId: products.storeId })
-      .from(carts)
-      .leftJoin(
-        products,
-        sql`JSON_CONTAINS(carts.items, JSON_OBJECT('productId', products.id))`
-      )
-      .groupBy(products.storeId)
-      .where(eq(carts.id, cartId))
+      .from(products)
+      .where(inArray(products.id, productIds))
 
-    const storeIds = cart.map((item) => item.storeId).filter((id) => id)
-
-    return storeIds
+    return rows.map((row) => row.storeId).filter((id): id is string => !!id)
   } catch (err) {
     return []
   }
@@ -205,12 +219,18 @@ export async function addToCart(rawInput: z.infer<typeof cartItemSchema>) {
       }
     }
 
+    // Lines are keyed by product + selected variant so different variants of the
+    // same product become separate cart lines.
     const cartItem = cart.items?.find(
-      (item) => item.productId === input.productId
+      (item) =>
+        item.productId === input.productId &&
+        (item.variant ?? "") === (input.variant ?? "")
     )
 
     if (cartItem) {
       cartItem.quantity += input.quantity
+      cartItem.price = input.price
+      cartItem.skuId = input.skuId
     } else {
       cart.items?.push(input)
     }
@@ -257,7 +277,9 @@ export async function updateCartItem(rawInput: z.infer<typeof cartItemSchema>) {
     }
 
     const cartItem = cart.items?.find(
-      (item) => item.productId === input.productId
+      (item) =>
+        item.productId === input.productId &&
+        (item.variant ?? "") === (input.variant ?? "")
     )
 
     if (!cartItem) {
@@ -266,7 +288,13 @@ export async function updateCartItem(rawInput: z.infer<typeof cartItemSchema>) {
 
     if (input.quantity === 0) {
       cart.items =
-        cart.items?.filter((item) => item.productId !== input.productId) ?? []
+        cart.items?.filter(
+          (item) =>
+            !(
+              item.productId === input.productId &&
+              (item.variant ?? "") === (input.variant ?? "")
+            )
+        ) ?? []
     } else {
       cartItem.quantity = input.quantity
     }
@@ -336,8 +364,17 @@ export async function deleteCartItem(
 
     if (!cart) return
 
+    // When a variant is provided, only remove that specific line; otherwise
+    // remove every line for the product (board builder behaviour).
     cart.items =
-      cart.items?.filter((item) => item.productId !== input.productId) ?? []
+      cart.items?.filter((item) =>
+        input.variant !== undefined
+          ? !(
+              item.productId === input.productId &&
+              (item.variant ?? "") === input.variant
+            )
+          : item.productId !== input.productId
+      ) ?? []
 
     await db
       .update(carts)

@@ -20,7 +20,27 @@ import {
   sql,
 } from "drizzle-orm"
 
+import { STORE_ID } from "@/config/store"
 import { getStoresSchema } from "@/lib/validations/store"
+
+/**
+ * Returns the single canonical store for this single-store e-commerce.
+ * Throws if the store has not been seeded yet.
+ */
+export const getStore = cache(
+  async () => {
+    return db.query.stores
+      .findFirst({
+        where: eq(stores.id, STORE_ID),
+      })
+      .then((store) => store ?? null)
+  },
+  ["store"],
+  {
+    revalidate: 3600,
+    tags: ["store"],
+  }
+)
 
 export async function getFeaturedStores() {
   return await cache(

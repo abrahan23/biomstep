@@ -18,7 +18,7 @@ import { stores } from "./stores"
 import { subcategories } from "./subcategories"
 import { productTags } from "./tags"
 import { lifecycleDates } from "./utils"
-import { productVariants } from "./variants"
+import { productOptions, productSkus } from "./variants"
 
 export const productStatusEnum = pgEnum("product_status", [
   "active",
@@ -80,7 +80,8 @@ export const productsRelations = relations(products, ({ one, many }) => ({
     fields: [products.subcategoryId],
     references: [subcategories.id],
   }),
-  variants: many(productVariants, { relationName: "productVariants" }),
+  options: many(productOptions),
+  skus: many(productSkus),
   tags: many(productTags, { relationName: "productTags" }),
 }))
 

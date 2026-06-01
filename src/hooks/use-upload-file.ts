@@ -1,18 +1,13 @@
 import * as React from "react"
 import type { StoredFile } from "@/types"
-import { toast } from "sonner"
 import type { UploadFilesOptions } from "uploadthing/types"
-
-import { getErrorMessage } from "@/lib/handle-error"
 import { uploadFiles } from "@/lib/uploadthing"
 import { type OurFileRouter } from "@/app/api/uploadthing/core"
 
-interface UseUploadFileProps
-  extends Pick<
-    UploadFilesOptions<OurFileRouter, keyof OurFileRouter>,
-    "headers" | "onUploadBegin" | "onUploadProgress" | "skipPolling"
-  > {
+interface UseUploadFileProps {
   defaultUploadedFiles?: StoredFile[]
+  headers?: UploadFilesOptions<OurFileRouter["productImage"]>["headers"]
+  onUploadBegin?: UploadFilesOptions<OurFileRouter["productImage"]>["onUploadBegin"]
 }
 
 export function useUploadFile(
@@ -21,38 +16,59 @@ export function useUploadFile(
 ) {
   const [uploadedFiles, setUploadedFiles] =
     React.useState<StoredFile[]>(defaultUploadedFiles)
+  const uploadedFilesRef = React.useRef<StoredFile[]>(defaultUploadedFiles)
   const [progresses, setProgresses] = React.useState<Record<string, number>>({})
   const [isUploading, setIsUploading] = React.useState(false)
 
-  async function uploadThings(files: File[]) {
+  // Sync when server-provided files change (e.g. after router.refresh()).
+  // Compare by serialized value so `product.images ?? []` does not create a
+  // new array reference on every render and cause an infinite update loop.
+  const defaultFilesKey = JSON.stringify(defaultUploadedFiles)
+  React.useEffect(() => {
+    const nextFiles = JSON.parse(defaultFilesKey) as StoredFile[]
+    setUploadedFiles(nextFiles)
+    uploadedFilesRef.current = nextFiles
+  }, [defaultFilesKey])
+
+  async function uploadThings(files: File[]): Promise<StoredFile[]> {
+    if (files.length === 0) {
+      return uploadedFilesRef.current
+    }
+
+    // Use clean File instances so UploadThing can match presigned URLs reliably.
+    const cleanFiles = files.map(
+      (file) =>
+        new File([file], file.name, {
+          type: file.type,
+          lastModified: file.lastModified,
+        })
+    )
+
     setIsUploading(true)
     try {
       const res = await uploadFiles(endpoint, {
         ...props,
-        files,
+        files: cleanFiles,
         onUploadProgress: ({ file, progress }) => {
-          setProgresses((prev) => {
-            return {
-              ...prev,
-              [file]: progress,
-            }
-          })
+          setProgresses((prev) => ({
+            ...prev,
+            [file.name]: progress,
+          }))
         },
       })
 
-      const formattedRes: StoredFile[] = res.map((file) => {
-        return {
-          id: file.key,
-          name: file.name,
-          url: file.url,
-        }
-      })
+      const formattedRes: StoredFile[] = res.map((file) => ({
+        id: file.key,
+        name: file.name,
+        url: file.ufsUrl ?? file.url,
+      }))
 
-      setUploadedFiles((prev) =>
-        prev ? [...prev, ...formattedRes] : formattedRes
-      )
+      const merged = [...uploadedFilesRef.current, ...formattedRes]
+      uploadedFilesRef.current = merged
+      setUploadedFiles(merged)
+      return merged
     } catch (err) {
-      toast.error(getErrorMessage(err))
+      throw err
     } finally {
       setProgresses({})
       setIsUploading(false)

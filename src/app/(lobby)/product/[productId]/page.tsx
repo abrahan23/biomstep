@@ -6,6 +6,7 @@ import { categories, products, stores } from "@/db/schema"
 import { env } from "@/env.js"
 import { and, desc, eq, not } from "drizzle-orm"
 
+import { getProductVariantData } from "@/lib/actions/variant"
 import { formatPrice, toTitleCase } from "@/lib/utils"
 import {
   Accordion,
@@ -85,6 +86,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
     where: eq(stores.id, product.storeId),
   })
 
+  const { options: productOptions, skus: productSkus } =
+    await getProductVariantData(productId)
+
   const otherProducts = store
     ? await db
         .select({
@@ -145,7 +149,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
               rating={product.rating}
             />
           </div>
-          <AddToCartForm productId={productId} showBuyNow={true} />
+          <AddToCartForm
+            productId={productId}
+            options={productOptions}
+            skus={productSkus}
+            showBuyNow={true}
+          />
           <Separator className="mt-5" />
           <Accordion
             type="single"

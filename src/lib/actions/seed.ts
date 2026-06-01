@@ -2,70 +2,162 @@ import { db } from "@/db"
 import {
   categories,
   products,
+  stores,
   subcategories,
-  type Category,
   type Product,
   type Subcategory,
 } from "@/db/schema"
 import { faker } from "@faker-js/faker"
-import { eq } from "drizzle-orm"
+import { eq, inArray, notInArray } from "drizzle-orm"
 
-import { productConfig } from "@/config/product"
+import { catalogSeed, catalogSeedSubcategoryIds } from "@/db/catalog-seed"
+import { storeConfig } from "@/config/store"
 import { generateId } from "@/lib/id"
-import { absoluteUrl, slugify } from "@/lib/utils"
+import { absoluteUrl } from "@/lib/utils"
 
 export async function revalidateItems() {
   console.log("🔄 Revalidating...")
   await fetch(absoluteUrl("/api/revalidate"))
 }
 
-export async function seedCategories() {
-  const data: Omit<Category, "createdAt" | "updatedAt">[] =
-    productConfig.categories.map((category) => ({
-      id: category.id,
-      name: category.name,
-      slug: slugify(category.name),
-      description: category.description,
-      image: category.image,
-    }))
+/**
+ * Single-store e-commerce: ensure the one canonical store exists with the id
+ * referenced by `STORE_ID` everywhere in the app.
+ */
+export async function seedStore() {
+  console.log(`📝 Upserting single store "${storeConfig.name}"`)
+  await db
+    .insert(stores)
+    .values({
+      id: storeConfig.id,
+      userId: "admin",
+      name: storeConfig.name,
+      slug: storeConfig.slug,
+      description: storeConfig.description,
+    })
+    .onConflictDoUpdate({
+      target: stores.id,
+      set: {
+        name: storeConfig.name,
+        slug: storeConfig.slug,
+        description: storeConfig.description,
+      },
+    })
+}
 
-  await db.delete(categories)
-  console.log(`📝 Inserting ${data.length} categories`)
-  await db.insert(categories).values(data)
+export async function syncCatalogFromSeed() {
+  console.log(`📝 Syncing ${catalogSeed.categories.length} categories`)
+
+  for (const [index, category] of catalogSeed.categories.entries()) {
+    await db
+      .insert(categories)
+      .values({
+        id: category.id,
+        name: category.name,
+        slug: category.slug,
+        description: category.description,
+        image: category.image,
+        sortOrder: index,
+      })
+      .onConflictDoUpdate({
+        target: categories.id,
+        set: {
+          name: category.name,
+          slug: category.slug,
+          description: category.description,
+          image: category.image,
+          sortOrder: index,
+        },
+      })
+  }
+
+  const subcategoryRows: Omit<Subcategory, "createdAt" | "updatedAt">[] = []
+
+  for (const category of catalogSeed.categories) {
+    for (const [index, subcategory] of category.subcategories.entries()) {
+      subcategoryRows.push({
+        id: subcategory.id,
+        name: subcategory.name,
+        slug: subcategory.slug,
+        description: subcategory.description,
+        categoryId: category.id,
+        sortOrder: index,
+      })
+    }
+  }
+
+  console.log(`📝 Syncing ${subcategoryRows.length} subcategories`)
+
+  for (const subcategory of subcategoryRows) {
+    await db
+      .insert(subcategories)
+      .values(subcategory)
+      .onConflictDoUpdate({
+        target: subcategories.id,
+        set: {
+          name: subcategory.name,
+          slug: subcategory.slug,
+          description: subcategory.description,
+          categoryId: subcategory.categoryId,
+          sortOrder: subcategory.sortOrder,
+        },
+      })
+  }
+
+  const configuredSubcategoryIds = catalogSeedSubcategoryIds
+
+  if (configuredSubcategoryIds.length > 0) {
+    const orphanSubcategories = await db
+      .select({ id: subcategories.id })
+      .from(subcategories)
+      .where(notInArray(subcategories.id, configuredSubcategoryIds))
+
+    const orphanIds = orphanSubcategories.map((subcategory) => subcategory.id)
+
+    if (orphanIds.length > 0) {
+      const orphanDetails = await db
+        .select({
+          id: subcategories.id,
+          categoryId: subcategories.categoryId,
+        })
+        .from(subcategories)
+        .where(inArray(subcategories.id, orphanIds))
+
+      for (const orphan of orphanDetails) {
+        const seedCategory = catalogSeed.categories.find(
+          (category) => category.id === orphan.categoryId
+        )
+        const fallbackSubcategory = seedCategory?.subcategories[0]
+
+        await db
+          .update(products)
+          .set({
+            subcategoryId: fallbackSubcategory?.id ?? null,
+          })
+          .where(eq(products.subcategoryId, orphan.id))
+      }
+
+      await db
+        .delete(subcategories)
+        .where(inArray(subcategories.id, orphanIds))
+
+      console.log(`🧹 Removed ${orphanIds.length} legacy subcategories`)
+    }
+  }
+
+  console.log("✅ Catalog synced from catalog seed")
+}
+
+export async function syncCatalogFromConfig() {
+  return syncCatalogFromSeed()
+}
+
+export async function seedCategories() {
+  await syncCatalogFromSeed()
 }
 
 export async function seedSubcategories() {
-  const data: Omit<Subcategory, "createdAt" | "updatedAt">[] = []
-
-  const allCategories = await db
-    .select({
-      id: categories.id,
-      name: categories.name,
-    })
-    .from(categories)
-    .execute()
-
-  allCategories.forEach((category) => {
-    const subcategories = productConfig.categories.find(
-      (c) => c.name === category.name
-    )?.subcategories
-
-    if (subcategories) {
-      subcategories.forEach((subcategory) => {
-        data.push({
-          id: subcategory.id,
-          name: subcategory.name,
-          slug: slugify(subcategory.name),
-          categoryId: category.id,
-          description: subcategory.description,
-        })
-      })
-    }
-  })
-
-  await db.delete(subcategories)
-  console.log(`📝 Inserting ${data.length} subcategories`)
-  await db.insert(subcategories).values(data)
+  await syncCatalogFromSeed()
 }
 
 export async function seedProducts({
@@ -77,7 +169,15 @@ export async function seedProducts({
 }) {
   const data: Omit<Product, "createdAt" | "updatedAt">[] = []
 
-  const categoryIds = productConfig.categories.map((category) => category.id)
+  const allCategories = await db
+    .select({ id: categories.id })
+    .from(categories)
+    .execute()
+  const categoryIds = allCategories.map((category) => category.id)
+
+  if (categoryIds.length === 0) {
+    throw new Error("No categories found. Run seedCategories() first.")
+  }
 
   for (let i = 0; i < (count ?? 10); i++) {
     const categoryId = faker.helpers.shuffle(categoryIds)[0]

@@ -2,47 +2,70 @@
 
 import { unstable_noStore as noStore, revalidatePath } from "next/cache"
 import { db } from "@/db"
-import { products } from "@/db/schema"
+import { categories, products } from "@/db/schema"
 import type { StoredFile } from "@/types"
-import { and, eq } from "drizzle-orm"
+import { and, asc, eq, ilike } from "drizzle-orm"
 import { type z } from "zod"
 
 import { getErrorMessage } from "@/lib/handle-error"
 import {
   type CreateProductSchema,
   type createProductSchema,
+  filterProductsSchema,
   type updateProductRatingSchema,
 } from "@/lib/validations/product"
 
 export async function filterProducts({ query }: { query: string }) {
   noStore()
   try {
-    if (query.length === 0) {
+    const { query: searchQuery } = filterProductsSchema.parse({ query })
+    const trimmedQuery = searchQuery.trim()
+
+    if (trimmedQuery.length === 0) {
       return {
         data: null,
         error: null,
       }
     }
 
-    const categoriesWithProducts = await db.query.categories.findMany({
-      columns: {
-        id: true,
-        name: true,
-      },
-      with: {
-        products: {
-          columns: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-      // This doesn't do anything
-      where: (table, { sql }) => sql`position(${query} in ${table.name}) > 0`,
-    })
+    const rows = await db
+      .select({
+        productId: products.id,
+        productName: products.name,
+        categoryId: categories.id,
+        categoryName: categories.name,
+      })
+      .from(products)
+      .innerJoin(categories, eq(products.categoryId, categories.id))
+      .where(
+        and(
+          eq(products.status, "active"),
+          ilike(products.name, `%${trimmedQuery}%`)
+        )
+      )
+      .orderBy(asc(categories.sortOrder), asc(products.name))
+      .limit(50)
+
+    const grouped = new Map<
+      string,
+      { name: string; products: { id: string; name: string }[] }
+    >()
+
+    for (const row of rows) {
+      const group = grouped.get(row.categoryId) ?? {
+        name: row.categoryName,
+        products: [],
+      }
+
+      group.products.push({
+        id: row.productId,
+        name: row.productName,
+      })
+      grouped.set(row.categoryId, group)
+    }
 
     return {
-      data: categoriesWithProducts,
+      data: Array.from(grouped.values()),
       error: null,
     }
   } catch (err) {
@@ -71,12 +94,15 @@ export async function addProduct(
       throw new Error("Product name already taken.")
     }
 
+    const { storeId, images, ...data } = input
+
     await db.insert(products).values({
-      ...input,
-      images: JSON.stringify(input.images) as unknown as StoredFile[],
+      ...data,
+      storeId,
+      images,
     })
 
-    revalidatePath(`/dashboard/stores/${input.storeId}/products.`)
+    revalidatePath(`/admin/products`)
 
     return {
       data: null,
@@ -91,7 +117,11 @@ export async function addProduct(
 }
 
 export async function updateProduct(
-  input: z.infer<typeof createProductSchema> & { id: string; storeId: string }
+  input: Omit<CreateProductSchema, "images"> & {
+    id: string
+    storeId: string
+    images: StoredFile[]
+  }
 ) {
   try {
     const product = await db.query.products.findFirst({
@@ -105,15 +135,17 @@ export async function updateProduct(
       throw new Error("Product not found.")
     }
 
+    const { id, storeId, images, ...data } = input
+
     await db
       .update(products)
       .set({
-        ...input,
-        images: JSON.stringify(input.images) as unknown as StoredFile[],
+        ...data,
+        images,
       })
-      .where(eq(products.id, input.id))
+      .where(eq(products.id, id))
 
-    revalidatePath(`/dashboard/stores/${input.storeId}/products/${input.id}`)
+    revalidatePath(`/admin/products/${input.id}`)
 
     return {
       data: null,
@@ -180,7 +212,7 @@ export async function deleteProduct(input: { id: string; storeId: string }) {
 
     await db.delete(products).where(eq(products.id, input.id))
 
-    revalidatePath(`/dashboard/stores/${input.storeId}/products`)
+    revalidatePath(`/admin/products`)
 
     return {
       data: null,

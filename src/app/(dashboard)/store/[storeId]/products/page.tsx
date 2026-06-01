@@ -6,7 +6,7 @@ import { db } from "@/db"
 import { categories, products, stores, type Product } from "@/db/schema"
 import { env } from "@/env.js"
 import type { SearchParams } from "@/types"
-import { and, asc, desc, eq, gte, inArray, like, lte, sql } from "drizzle-orm"
+import { and, asc, desc, eq, gte, ilike, inArray, lte, sql } from "drizzle-orm"
 
 import { storesProductsSearchParamsSchema } from "@/lib/validations/params"
 import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton"
@@ -87,7 +87,7 @@ export default async function ProductsPage({
           and(
             eq(products.storeId, storeId),
             // Filter by name
-            name ? like(products.name, `%${name}%`) : undefined,
+            name ? ilike(products.name, `%${name}%`) : undefined,
             // Filter by category
             categoryIds.length > 0
               ? inArray(products.categoryId, categoryIds)
@@ -118,7 +118,7 @@ export default async function ProductsPage({
           and(
             eq(products.storeId, storeId),
             // Filter by name
-            name ? like(products.name, `%${name}%`) : undefined,
+            name ? ilike(products.name, `%${name}%`) : undefined,
             // Filter by category
             categoryIds.length > 0
               ? inArray(products.categoryId, categoryIds)

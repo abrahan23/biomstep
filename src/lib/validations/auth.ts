@@ -48,3 +48,15 @@ export const userPrivateMetadataSchema = z.object({
 export type UserPrivateMetadataSchema = z.infer<
   typeof userPrivateMetadataSchema
 >
+
+export const userRoleEnum = ["user", "admin"] as const
+
+export const userPublicMetadataSchema = z.object({
+  role: z.enum(userRoleEnum).optional().nullable(),
+})
+
+export type UserRole = (typeof userRoleEnum)[number]
+
+export type UserPublicMetadataSchema = z.infer<
+  typeof userPublicMetadataSchema
+>

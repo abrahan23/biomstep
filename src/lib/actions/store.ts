@@ -78,7 +78,7 @@ export async function updateStore(storeId: string, fd: FormData) {
       })
       .where(eq(stores.id, storeId))
 
-    revalidatePath(`/store/${storeId}`)
+    revalidatePath(`/admin`)
 
     return {
       data: null,

@@ -1,8 +1,13 @@
-import { isClerkAPIResponseError } from "@clerk/nextjs/errors"
 import { toast } from "sonner"
 import * as z from "zod"
 
 import { unknownError } from "@/lib/constants"
+
+function isClerkAPIResponseError(
+  err: unknown
+): err is { errors: Array<{ longMessage?: string }> } {
+  return typeof err === "object" && err !== null && "clerkError" in err
+}
 
 export function getErrorMessage(err: unknown) {
   if (err instanceof z.ZodError) {

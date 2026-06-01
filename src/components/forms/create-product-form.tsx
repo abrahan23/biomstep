@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import type { StoredFile } from "@/types"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { toast } from "sonner"
@@ -83,19 +82,21 @@ export function CreateProductForm({
     setLoading(true)
 
     toast.promise(
-      uploadFiles(input.images ?? []).then(() => {
-        return addProduct({
-          ...input,
+      uploadFiles(input.images ?? []).then(async (images) => {
+        const { images: _files, ...rest } = input
+        const result = await addProduct({
+          ...rest,
           storeId,
-          images: JSON.stringify(uploadedFiles) as unknown as StoredFile[],
+          images,
         })
+        if (result.error) throw new Error(result.error)
       }),
       {
         loading: "Adding product...",
         success: () => {
           form.reset()
           setLoading(false)
-          return "Product"
+          return "Product added"
         },
         error: (err) => {
           setLoading(false)
@@ -245,35 +246,6 @@ export function CreateProductForm({
           />
         </div>
         <div className="space-y-6">
-          <FormField
-            control={form.control}
-            name="images"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormLabel>Images</FormLabel>
-                <Select
-                  value={field.value?.toString()}
-                  onValueChange={field.onChange}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a subcategory" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectGroup>
-                      {subcategories.map((option) => (
-                        <SelectItem key={option.id} value={option.id}>
-                          {option.name}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           <FormField
             control={form.control}
             name="images"

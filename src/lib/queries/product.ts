@@ -13,9 +13,20 @@ import {
   type Product,
 } from "@/db/schema"
 import type { SearchParams } from "@/types"
-import { and, asc, count, desc, eq, gte, inArray, lte, sql } from "drizzle-orm"
+import { asc, and, count, desc, eq, gte, inArray, lte, sql } from "drizzle-orm"
 
 import { getProductsSchema } from "@/lib/validations/product"
+
+function normalizeProductSearchInput(input: SearchParams) {
+  const normalized: Record<string, string | undefined> = {}
+
+  for (const [key, value] of Object.entries(input)) {
+    if (value === undefined) continue
+    normalized[key] = Array.isArray(value) ? value[0] : value
+  }
+
+  return normalized
+}
 
 // See the unstable_cache API docs: https://nextjs.org/docs/app/api-reference/functions/unstable_cache
 export async function getFeaturedProducts() {
@@ -50,12 +61,41 @@ export async function getFeaturedProducts() {
   )()
 }
 
+export async function getBestSellingProducts() {
+  return await cache(
+    async () => {
+      return db
+        .select({
+          id: products.id,
+          name: products.name,
+          images: products.images,
+          category: categories.name,
+          price: products.price,
+          inventory: products.inventory,
+          stripeAccountId: stores.stripeAccountId,
+        })
+        .from(products)
+        .limit(8)
+        .leftJoin(stores, eq(products.storeId, stores.id))
+        .leftJoin(categories, eq(products.categoryId, categories.id))
+        .where(eq(products.status, "active"))
+        .groupBy(products.id, stores.stripeAccountId, categories.name)
+        .orderBy(desc(products.rating), desc(products.createdAt))
+    },
+    ["best-selling-products"],
+    {
+      revalidate: 3600,
+      tags: ["best-selling-products"],
+    }
+  )()
+}
+
 // See the unstable_noStore API docs: https://nextjs.org/docs/app/api-reference/functions/unstable_noStore
 export async function getProducts(input: SearchParams) {
   noStore()
 
   try {
-    const search = getProductsSchema.parse(input)
+    const search = getProductsSchema.parse(normalizeProductSearchInput(input))
 
     const limit = search.per_page
     const offset = (search.page - 1) * limit
@@ -100,15 +140,14 @@ export async function getProducts(input: SearchParams) {
             subcategoryIds.length > 0
               ? inArray(products.subcategoryId, subcategoryIds)
               : undefined,
+            search.active !== "false"
+              ? eq(products.status, "active")
+              : undefined,
             minPrice ? gte(products.price, minPrice) : undefined,
             maxPrice ? lte(products.price, maxPrice) : undefined,
-            storeIds.length ? inArray(products.storeId, storeIds) : undefined,
-            input.active === "true"
-              ? sql`(${stores.stripeAccountId}) is not null`
-              : undefined
+            storeIds.length ? inArray(products.storeId, storeIds) : undefined
           )
         )
-        .groupBy(products.id)
         .orderBy(
           column && column in products
             ? order === "asc"
@@ -130,6 +169,9 @@ export async function getProducts(input: SearchParams) {
             subcategoryIds.length > 0
               ? inArray(products.subcategoryId, subcategoryIds)
               : undefined,
+            search.active !== "false"
+              ? eq(products.status, "active")
+              : undefined,
             minPrice ? gte(products.price, minPrice) : undefined,
             maxPrice ? lte(products.price, maxPrice) : undefined,
             storeIds.length ? inArray(products.storeId, storeIds) : undefined
@@ -148,6 +190,9 @@ export async function getProducts(input: SearchParams) {
 
     return transaction
   } catch (err) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("[getProducts]", err)
+    }
     return {
       data: [],
       pageCount: 0,
@@ -183,15 +228,16 @@ export async function getCategories() {
   return await cache(
     async () => {
       return db
-        .selectDistinct({
+        .select({
           id: categories.id,
           name: categories.name,
           slug: categories.slug,
           description: categories.description,
           image: categories.image,
+          sortOrder: categories.sortOrder,
         })
         .from(categories)
-        .orderBy(desc(categories.name))
+        .orderBy(asc(categories.sortOrder), asc(categories.name))
     },
     ["categories"],
     {
@@ -199,6 +245,40 @@ export async function getCategories() {
       tags: ["categories"],
     }
   )()
+}
+
+export async function getCategoryBySlug({ slug }: { slug: string }) {
+  noStore()
+
+  return db
+    .select({
+      id: categories.id,
+      name: categories.name,
+      slug: categories.slug,
+      description: categories.description,
+      image: categories.image,
+    })
+    .from(categories)
+    .where(eq(categories.slug, slug))
+    .execute()
+    .then((res) => res[0])
+}
+
+export async function getSubcategoryBySlug({ slug }: { slug: string }) {
+  noStore()
+
+  return db
+    .select({
+      id: subcategories.id,
+      name: subcategories.name,
+      slug: subcategories.slug,
+      description: subcategories.description,
+      categoryId: subcategories.categoryId,
+    })
+    .from(subcategories)
+    .where(eq(subcategories.slug, slug))
+    .execute()
+    .then((res) => res[0])
 }
 
 export async function getCategorySlugFromId({ id }: { id: string }) {
@@ -225,13 +305,15 @@ export async function getSubcategories() {
   return await cache(
     async () => {
       return db
-        .selectDistinct({
+        .select({
           id: subcategories.id,
           name: subcategories.name,
           slug: subcategories.slug,
           description: subcategories.description,
+          sortOrder: subcategories.sortOrder,
         })
         .from(subcategories)
+        .orderBy(asc(subcategories.sortOrder), asc(subcategories.name))
     },
     ["subcategories"],
     {
@@ -269,14 +351,16 @@ export async function getSubcategoriesByCategory({
   return await cache(
     async () => {
       return db
-        .selectDistinct({
+        .select({
           id: subcategories.id,
           name: subcategories.name,
           slug: subcategories.slug,
           description: subcategories.description,
+          sortOrder: subcategories.sortOrder,
         })
         .from(subcategories)
-        .where(eq(subcategories.id, categoryId))
+        .where(eq(subcategories.categoryId, categoryId))
+        .orderBy(asc(subcategories.sortOrder), asc(subcategories.name))
     },
     [`subcategories-${categoryId}`],
     {

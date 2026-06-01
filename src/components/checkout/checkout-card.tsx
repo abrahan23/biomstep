@@ -27,9 +27,7 @@ export async function CheckoutCard({ storeId }: CheckoutCardProps) {
       id={`checkout-store-${storeId}`}
       aria-labelledby={`checkout-store-${storeId}-heading`}
       className={cn(
-        cartLineItems[0]?.storeStripeAccountId
-          ? "border-green-500"
-          : "border-destructive"
+        cartLineItems.length > 0 ? "border-green-500" : "border-destructive"
       )}
     >
       <CardHeader className="flex flex-row items-center space-x-4 py-4">

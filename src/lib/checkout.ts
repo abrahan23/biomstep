@@ -3,15 +3,14 @@ import type { StripePaymentStatus } from "@/types"
 import { cn } from "@/lib/utils"
 import { type CartLineItemSchema } from "@/lib/validations/cart"
 
-// @see: https://github.com/jackblatch/OneStopShop/blob/main/server-actions/stripe/payment.ts
+// Single-store e-commerce: payments go directly to the platform account, so
+// there is no marketplace application fee.
 export function calculateOrderAmount(items: CartLineItemSchema[]) {
   const total = items.reduce((acc, item) => {
     return acc + Number(item.price) * item.quantity
   }, 0)
-  const fee = total * 0.01
   return {
     total: Number((total * 100).toFixed(0)), // converts to cents which stripe charges in
-    fee: Number((fee * 100).toFixed(0)),
   }
 }
 

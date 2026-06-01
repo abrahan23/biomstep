@@ -12,6 +12,7 @@ import {
   stripePaymentStatuses,
 } from "@/lib/checkout"
 import { cn, formatDate, formatId, formatPrice } from "@/lib/utils"
+import { useDataTable } from "@/hooks/use-data-table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -122,7 +123,7 @@ export function OrdersTable({
             <DropdownMenuContent align="end" className="w-[160px]">
               <DropdownMenuItem asChild>
                 <Link
-                  href={`/dashboard/stores/${storeId}/orders/${row.original.id}`}
+                  href={`/admin/orders/${row.original.id}`}
                 >
                   View details
                 </Link>
@@ -144,28 +145,27 @@ export function OrdersTable({
     [storeId]
   )
 
-  return null
+  const { table } = useDataTable({
+    data,
+    columns,
+    pageCount,
+    filterFields: [
+      ...(isSearchable
+        ? [
+            {
+              value: "customer" as const,
+              label: "Customer",
+              placeholder: "Filter by customer email",
+            },
+          ]
+        : []),
+      {
+        value: "status" as const,
+        label: "Status",
+        options: stripePaymentStatuses,
+      },
+    ],
+  })
 
-  // return (
-  //   <DataTable
-  //     pageCount={pageCount}
-  //     searchableColumns={
-  //       isSearchable
-  //         ? [
-  //             {
-  //               id: "customer",
-  //               title: "customers",
-  //             },
-  //           ]
-  //         : []
-  //     }
-  //     filterableColumns={[
-  //       {
-  //         id: "status",
-  //         title: "Status",
-  //         options: stripePaymentStatuses,
-  //       },
-  //     ]}
-  //   />
-  // )
+  return <DataTable table={table} />
 }

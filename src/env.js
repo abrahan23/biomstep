@@ -14,8 +14,7 @@ export const env = createEnv({
     CLERK_SECRET_KEY: z.string().min(1),
     RESEND_API_KEY: z.string().min(1),
     EMAIL_FROM_ADDRESS: z.string().email(),
-    UPLOADTHING_SECRET: z.string().min(1),
-    UPLOADTHING_APP_ID: z.string().min(1),
+    UPLOADTHING_TOKEN: z.string().min(1),
     UPSTASH_REDIS_REST_URL: z.string().url(),
     UPSTASH_REDIS_REST_TOKEN: z.string().min(1),
     STRIPE_API_KEY: z.string().min(1),
@@ -35,6 +34,8 @@ export const env = createEnv({
     NEXT_PUBLIC_CLERK_SIGN_IN_URL: z.string().min(1),
     NEXT_PUBLIC_CLERK_SIGN_UP_URL: z.string().min(1),
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string(),
+    /** Vídeo del hero generado (p. ej. con Higgsfield). MP4 hospedado en CDN o /public. */
+    NEXT_PUBLIC_HERO_VIDEO_URL: z.string().url().optional(),
   },
 
   /**
@@ -52,12 +53,12 @@ export const env = createEnv({
     CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     EMAIL_FROM_ADDRESS: process.env.EMAIL_FROM_ADDRESS,
-    UPLOADTHING_SECRET: process.env.UPLOADTHING_SECRET,
-    UPLOADTHING_APP_ID: process.env.UPLOADTHING_APP_ID,
+    UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
     UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
       process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+    NEXT_PUBLIC_HERO_VIDEO_URL: process.env.NEXT_PUBLIC_HERO_VIDEO_URL,
     STRIPE_API_KEY: process.env.STRIPE_API_KEY,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     STRIPE_STD_MONTHLY_PRICE_ID: process.env.STRIPE_STD_MONTHLY_PRICE_ID,

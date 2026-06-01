@@ -169,7 +169,7 @@ export function useDataTable<TData, TValue>({
         } else if (searchableColumn) {
           filters.push({
             id: key,
-            value: [value],
+            value,
           })
         }
 

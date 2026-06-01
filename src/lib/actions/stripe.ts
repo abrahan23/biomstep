@@ -15,6 +15,7 @@ import type Stripe from "stripe"
 import { type z } from "zod"
 
 import { pricingConfig } from "@/config/pricing"
+import { STORE_ID } from "@/config/store"
 import { calculateOrderAmount } from "@/lib/checkout"
 import { getErrorMessage } from "@/lib/handle-error"
 import { stripe } from "@/lib/stripe"
@@ -255,32 +256,24 @@ export async function getPaymentIntent(
   noStore()
 
   try {
+    if (!input.paymentIntentId) {
+      throw new Error("Payment intent id is required.")
+    }
+
     const cartId = cookies().get("cartId")?.value
 
-    const { isConnected, payment } = await getStripeAccount({
-      storeId: input.storeId,
-      retrieveAccount: false,
-    })
-
-    if (!isConnected || !payment) {
-      throw new Error("Store not connected to Stripe.")
-    }
-
-    if (!payment.stripeAccountId) {
-      throw new Error("Stripe account not found.")
-    }
-
+    // Single-store e-commerce: payments are charged directly on the platform
+    // account (no Stripe Connect), so retrieve the intent without an account.
     const paymentIntent = await stripe.paymentIntents.retrieve(
-      input.paymentIntentId,
-      {
-        stripeAccount: payment.stripeAccountId,
-      }
+      input.paymentIntentId
     )
 
     if (paymentIntent.status !== "succeeded") {
       throw new Error("Payment intent not succeeded.")
     }
 
+    // Verify the intent belongs to this checkout, either by the cart that
+    // created it or by the delivery postal code entered on the success page.
     if (
       paymentIntent.metadata.cartId !== cartId &&
       paymentIntent.shipping?.address?.postal_code?.split(" ").join("") !==
@@ -441,15 +434,7 @@ export async function createPaymentIntent(
   noStore()
 
   try {
-    const { isConnected, payment } = await getStripeAccount(input)
-
-    if (!isConnected || !payment) {
-      throw new Error("Store not connected to Stripe.")
-    }
-
-    if (!payment.stripeAccountId) {
-      throw new Error("Stripe account not found.")
-    }
+    const user = await currentUser()
 
     const cartId = cookies().get("cartId")?.value
 
@@ -461,57 +446,32 @@ export async function createPaymentIntent(
       productId: item.id,
       price: Number(item.price),
       quantity: item.quantity,
+      variant: item.variant ?? undefined,
+      skuId: item.skuId ?? undefined,
     }))
 
     const metadata: Stripe.MetadataParam = {
       cartId: cartId,
+      storeId: STORE_ID,
+      userId: user?.id ?? "",
       // Stripe metadata values must be within 500 characters string
       items: JSON.stringify(checkoutItems),
     }
 
-    const { total, fee } = calculateOrderAmount(input.items)
+    const { total } = calculateOrderAmount(input.items)
 
-    // Update the cart with the payment intent id and client secret if it exists
-    // if (!cartId) {
-    //   const cart = await db.query.carts.findFirst({
-    //     columns: {
-    //       paymentIntentId: true,
-    //       clientSecret: true,
-    //     },
-    //     where: eq(carts.id, cartId),
-    //   })
-
-    //   if (cart?.clientSecret && cart.paymentIntentId) {
-    //     await stripe.paymentIntents.update(
-    //       cart.paymentIntentId,
-    //       {
-    //         amount: total,
-    //         application_fee_amount: fee,
-    //         metadata,
-    //       },
-    //       {
-    //         stripeAccount: payment.stripeAccountId,
-    //       }
-    //     )
-    //     return { clientSecret: cart.clientSecret }
-    //   }
-    // }
-
-    // Create a payment intent if it doesn't exist
-    const paymentIntent = await stripe.paymentIntents.create(
-      {
-        amount: total,
-        application_fee_amount: fee,
-        currency: "usd",
-        metadata,
-        automatic_payment_methods: {
-          enabled: true,
-        },
+    // Single-store e-commerce: charge the platform account directly (no Connect,
+    // no application fee). Omitting `payment_method_types` enables dynamic
+    // payment methods configured from the Stripe Dashboard.
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: total,
+      currency: "usd",
+      metadata,
+      receipt_email: user ? getUserEmail(user) : undefined,
+      automatic_payment_methods: {
+        enabled: true,
       },
-      {
-        stripeAccount: payment.stripeAccountId,
-      }
-    )
+    })
 
     // Update the cart with the payment intent id and client secret
     if (paymentIntent.status === "requires_payment_method") {

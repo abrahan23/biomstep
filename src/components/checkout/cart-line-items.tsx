@@ -36,7 +36,10 @@ export function CartLineItems({
         {...props}
       >
         {items.map((item) => (
-          <div key={item.id} className="space-y-3">
+          <div
+            key={`${item.id}-${item.variant ?? ""}`}
+            className="space-y-3"
+          >
             <div
               className={cn(
                 "flex items-start justify-between gap-4",
@@ -72,6 +75,11 @@ export function CartLineItems({
                   <span className="line-clamp-1 text-sm font-medium">
                     {item.name}
                   </span>
+                  {item.variant ? (
+                    <span className="line-clamp-1 text-xs font-medium text-muted-foreground">
+                      {item.variant}
+                    </span>
+                  ) : null}
                   {isEditable ? (
                     <span className="line-clamp-1 text-xs text-muted-foreground">
                       {formatPrice(item.price)} x {item.quantity} ={" "}

@@ -1,8 +1,5 @@
 import type { FooterItem, MainNavItem } from "@/types"
 
-import { productConfig } from "@/config/product"
-import { slugify } from "@/lib/utils"
-
 export type SiteConfig = typeof siteConfig
 
 const links = {
@@ -13,55 +10,32 @@ const links = {
   calDotCom: "https://cal.com/sadmann7",
 }
 
-export const siteConfig = {
-  name: "Skateshop",
-  description:
-    "An open source e-commerce skateshop build with everything new in Next.js.",
-  url: "https://skateshop.sadmn.com",
-  ogImage: "https://skateshop.sadmn.com/opengraph-image.png",
-  links,
-  mainNav: [
+export const blogMainNavItem = {
+  title: "Blog",
+  href: "/blog",
+  description: "Read our latest blog posts.",
+  items: [
     {
-      title: "Lobby",
-      items: [
-        {
-          title: "Products",
-          href: "/products",
-          description: "All the products we have to offer.",
-          items: [],
-        },
-        {
-          title: "Build a Board",
-          href: "/build-a-board",
-          description: "Build your own custom skateboard.",
-          items: [],
-        },
-        {
-          title: "Blog",
-          href: "/blog",
-          description: "Read our latest blog posts.",
-          items: [],
-        },
-      ],
+      title: "Todos",
+      href: "/blog",
+      description: "Blog de BIOMSTEP.",
+      items: [],
     },
-    ...productConfig.categories.map((category) => ({
-      title: category.name,
-      items: [
-        {
-          title: "All",
-          href: `/categories/${slugify(category.name)}`,
-          description: `All ${category.name}.`,
-          items: [],
-        },
-        ...category.subcategories.map((subcategory) => ({
-          title: subcategory.name,
-          href: `/categories/${slugify(category.name)}/${slugify(subcategory.name)}`,
-          description: subcategory.description,
-          items: [],
-        })),
-      ],
-    })),
-  ] satisfies MainNavItem[],
+    {
+      title: "Cirugía ",
+      href: "/cirugia-de-pie",
+      description: "Cirugía de pie.",
+      items: [],
+    },
+  ],
+} satisfies MainNavItem
+
+export const siteConfig = {
+  name: "Biomstep",
+  description: "La tienda oficial de BIOMSTEP.",
+  url: "https://biomstep.com",
+  ogImage: "https://biomstep.com/opengraph-image.png",
+  links,
   footerNav: [
     {
       title: "Credits",

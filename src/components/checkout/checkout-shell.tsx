@@ -14,7 +14,6 @@ import { cn } from "@/lib/utils"
 
 interface CheckoutShellProps
   extends React.PropsWithChildren<React.HTMLAttributes<HTMLDivElement>> {
-  storeStripeAccountId: string
   paymentIntentPromise: Promise<{
     data: {
       clientSecret: string | null
@@ -25,15 +24,11 @@ interface CheckoutShellProps
 
 export function CheckoutShell({
   children,
-  storeStripeAccountId,
   paymentIntentPromise,
   className,
   ...props
 }: CheckoutShellProps) {
-  const stripePromise = React.useMemo(
-    () => getStripe(storeStripeAccountId),
-    [storeStripeAccountId]
-  )
+  const stripePromise = React.useMemo(() => getStripe(), [])
 
   /**
    * Calling createPaymentIntentAction at the client component to avoid stripe authentication error in server action
@@ -43,7 +38,14 @@ export function CheckoutShell({
   if (!data?.clientSecret || error) {
     return (
       <section className={cn("size-full", className)} {...props}>
-        <div className="size-full bg-white" />
+        <div className="flex size-full flex-col items-center justify-center gap-2 bg-white px-6 text-center">
+          <p className="text-sm font-medium text-destructive">
+            {error ?? "Could not start checkout. Your cart may be empty."}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Go back to the cart and try again.
+          </p>
+        </div>
       </section>
     )
   }

@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { type Product, type Store } from "@/db/schema"
+import { type Store } from "@/db/schema"
 import type { Option } from "@/types"
 import {
   ChevronDownIcon,
@@ -13,12 +13,13 @@ import {
 import { queryConfig } from "@/config/query"
 import {
   type getCategories,
+  type getProducts,
   type getSubcategoriesByCategory,
 } from "@/lib/queries/product"
 import { cn, toTitleCase, truncate } from "@/lib/utils"
 import { useDebounce } from "@/hooks/use-debounce"
 import { Button } from "@/components/ui/button"
-import { Card, CardDescription } from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
@@ -41,14 +42,43 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { Slider } from "@/components/ui/slider"
-import { Switch } from "@/components/ui/switch"
 import { MultiSelect } from "@/components/multi-select"
 import { PaginationButton } from "@/components/pagination-button"
 import { ProductCard } from "@/components/product-card"
+import { ProductsEmptyState } from "@/components/products-empty-state"
+
+function parsePriceRange(value: string | null | undefined): [number, number] {
+  if (!value) return [0, 500]
+
+  const [min, max] = value.split("-").map(Number)
+
+  if (Number.isNaN(min) || Number.isNaN(max)) {
+    return [0, 500]
+  }
+
+  return [min, max]
+}
+
+function useSkipFirstRenderEffect(effect: () => void, deps: React.DependencyList) {
+  const isFirstRender = React.useRef(true)
+
+  React.useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+
+    effect()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps)
+}
 
 interface ProductsProps {
-  products: Product[]
+  products: Awaited<ReturnType<typeof getProducts>>["data"]
   pageCount: number
+  collectionName?: string
+  parentCategoryHref?: string
+  parentCategoryName?: string
   categories?: string[]
   category?: Awaited<ReturnType<typeof getCategories>>[number]
   subcategories?: Awaited<ReturnType<typeof getSubcategoriesByCategory>>
@@ -62,6 +92,9 @@ interface ProductsProps {
 export function Products({
   products,
   pageCount,
+  collectionName,
+  parentCategoryHref,
+  parentCategoryName,
   category,
   categories,
   subcategories,
@@ -82,7 +115,13 @@ export function Products({
   const store_page = searchParams?.get("store_page") ?? "1"
   const categoriesParam = searchParams?.get("categories")
   const subcategoriesParam = searchParams?.get("subcategories")
-  const active = searchParams?.get("active") ?? "true"
+  const priceRangeParam = searchParams?.get("price_range")
+  const hasActiveFilters = Boolean(
+    priceRangeParam ||
+      store_ids ||
+      (categoriesParam && !category) ||
+      (subcategoriesParam && !parentCategoryHref)
+  )
 
   // Create query string
   const createQueryString = React.useCallback(
@@ -103,10 +142,12 @@ export function Products({
   )
 
   // Price filter
-  const [priceRange, setPriceRange] = React.useState<[number, number]>([0, 500])
+  const [priceRange, setPriceRange] = React.useState<[number, number]>(() =>
+    parsePriceRange(priceRangeParam)
+  )
   const debouncedPrice = useDebounce(priceRange, 500)
 
-  React.useEffect(() => {
+  useSkipFirstRenderEffect(() => {
     const [min, max] = debouncedPrice
     startTransition(() => {
       const newQueryString = createQueryString({
@@ -117,7 +158,6 @@ export function Products({
         scroll: false,
       })
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedPrice])
 
   // Category filter
@@ -132,7 +172,7 @@ export function Products({
       : null
   )
 
-  React.useEffect(() => {
+  useSkipFirstRenderEffect(() => {
     startTransition(() => {
       const newQueryString = createQueryString({
         categories: selectedCategories?.length
@@ -145,7 +185,6 @@ export function Products({
         scroll: false,
       })
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCategories])
 
   // Subcategory filter
@@ -160,7 +199,7 @@ export function Products({
       : null
   )
 
-  React.useEffect(() => {
+  useSkipFirstRenderEffect(() => {
     startTransition(() => {
       const newQueryString = createQueryString({
         subcategories: selectedSubcategories?.length
@@ -172,7 +211,6 @@ export function Products({
         scroll: false,
       })
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSubcategories])
 
   // Store filter
@@ -180,7 +218,7 @@ export function Products({
     store_ids ? store_ids?.split(".") : null
   )
 
-  React.useEffect(() => {
+  useSkipFirstRenderEffect(() => {
     startTransition(() => {
       const newQueryString = createQueryString({
         store_ids: storeIds?.length ? storeIds.join(".") : null,
@@ -190,7 +228,6 @@ export function Products({
         scroll: false,
       })
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storeIds])
 
   return (
@@ -208,31 +245,6 @@ export function Products({
             </SheetHeader>
             <Separator />
             <div className="flex flex-1 flex-col gap-5 overflow-hidden p-1">
-              <div className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                <div className="space-y-0.5">
-                  <Label htmlFor={`active-${id}`}>Active stores</Label>
-                  <CardDescription>
-                    Only show products from stores that are connected to Stripe
-                  </CardDescription>
-                </div>
-                <Switch
-                  id={`active-${id}`}
-                  checked={active === "true"}
-                  onCheckedChange={(value) =>
-                    startTransition(() => {
-                      router.push(
-                        `${pathname}?${createQueryString({
-                          active: value ? "true" : "false",
-                        })}`,
-                        {
-                          scroll: false,
-                        }
-                      )
-                    })
-                  }
-                  disabled={isPending}
-                />
-              </div>
               <Card className="space-y-4 rounded-lg p-3">
                 <h3 className="text-sm font-medium tracking-wide text-foreground">
                   Price range ($)
@@ -418,7 +430,6 @@ export function Products({
                           store_ids: null,
                           categories: null,
                           subcategories: null,
-                          active: "true",
                         })}`,
                         {
                           scroll: false,
@@ -472,18 +483,18 @@ export function Products({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      {!isPending && !products.length ? (
-        <div className="mx-auto flex max-w-xs flex-col space-y-1.5">
-          <h1 className="text-center text-2xl font-bold">No products found</h1>
-          <p className="text-center text-muted-foreground">
-            Try changing your filters, or check back later for new products
-          </p>
-        </div>
+      {!products.length ? (
+        <ProductsEmptyState
+          collectionName={collectionName ?? "esta colección"}
+          hasActiveFilters={hasActiveFilters}
+          parentCategoryHref={parentCategoryHref}
+          parentCategoryName={parentCategoryName}
+        />
       ) : null}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {/* {products.map((product) => (
+        {products.map((product) => (
           <ProductCard key={product.id} product={product} />
-        ))} */}
+        ))}
       </div>
       {products.length ? (
         <PaginationButton

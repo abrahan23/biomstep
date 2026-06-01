@@ -1,6 +1,9 @@
+import { storeConfig } from "@/config/store"
 import {
   revalidateItems,
   seedCategories,
+  seedProducts,
+  seedStore,
   seedSubcategories,
 } from "@/lib/actions/seed"
 
@@ -9,11 +12,13 @@ async function runSeed() {
 
   const start = Date.now()
 
+  await seedStore()
+
   await seedCategories()
 
   await seedSubcategories()
 
-  // Add more seed functions here
+  await seedProducts({ storeId: storeConfig.id, count: 30 })
 
   await revalidateItems()
 

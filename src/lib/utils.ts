@@ -70,10 +70,14 @@ export function formatId(id: string) {
 
 export function slugify(str: string) {
   return str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
+    .trim()
     .replace(/ /g, "-")
     .replace(/[^\w-]+/g, "")
     .replace(/--+/g, "-")
+    .replace(/^-+|-+$/g, "")
 }
 
 export function unslugify(str: string) {

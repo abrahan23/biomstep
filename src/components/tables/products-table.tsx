@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { DataTable } from "@/components/data-table/data-table"
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header"
+import { DataTableToolbar } from "@/components/data-table/data-table-toolbar"
 
 type AwaitedProduct = Pick<
   Product,
@@ -94,22 +95,21 @@ export function ProductsTable({
         ),
       },
       {
-        accessorKey: "category",
+        id: "category",
+        accessorKey: "categoryId",
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title="Category" />
         ),
-        cell: ({ cell }) => {
-          const category = cell.getValue() as string
-
-          const existingCategory = categories.some(
-            (categoryData) => categoryData.name === category
+        cell: ({ row }) => {
+          const category = categories.find(
+            (categoryData) => categoryData.id === row.original.categoryId
           )
 
-          if (!existingCategory) return null
+          if (!category) return null
 
           return (
             <Badge variant="outline" className="capitalize">
-              {category}
+              {category.name}
             </Badge>
           )
         },
@@ -156,11 +156,7 @@ export function ProductsTable({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[160px]">
               <DropdownMenuItem asChild>
-                <Link
-                  href={`/dashboard/stores/${storeId}/products/${row.original.id}`}
-                >
-                  Edit
-                </Link>
+                <Link href={`/admin/products/${row.original.id}`}>Edit</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href={`/product/${row.original.id}`}>View</Link>
@@ -194,7 +190,7 @@ export function ProductsTable({
         ),
       },
     ],
-    [data, isPending, storeId]
+    [categories, data, isPending, storeId]
   )
 
   function deleteSelectedRows() {
@@ -221,25 +217,36 @@ export function ProductsTable({
     )
   }
 
+  const filterFields = React.useMemo(
+    () => [
+      {
+        value: "name" as const,
+        label: "Nombre",
+        placeholder: "Buscar productos...",
+      },
+      {
+        value: "category" as const,
+        label: "Categoría",
+        options: categories.map((category) => ({
+          label: category.name,
+          value: category.id,
+        })),
+      },
+    ],
+    [categories]
+  )
+
   const { table } = useDataTable({
     data,
     columns,
     pageCount,
-    filterFields: [
-      {
-        value: "name",
-        label: "Name",
-      },
-      // {
-      //   value: "category",
-      //   label: "Category",
-      //   options: products.category.enumValues.map((category) => ({
-      //     label: `${category.charAt(0).toUpperCase()}${category.slice(1)}`,
-      //     value: category,
-      //   })),
-      // },
-    ],
+    filterFields,
   })
 
-  return <DataTable table={table} />
+  return (
+    <div className="space-y-2.5">
+      <DataTableToolbar table={table} filterFields={filterFields} />
+      <DataTable table={table} />
+    </div>
+  )
 }

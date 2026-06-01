@@ -28,9 +28,14 @@ export function ProductsCombobox() {
   const router = useRouter()
   const [open, setOpen] = React.useState(false)
   const [query, setQuery] = React.useState("")
+  const [isMac, setIsMac] = React.useState(false)
   const debouncedQuery = useDebounce(query, 300)
   const [data, setData] = React.useState<ProductGroup[] | null>(null)
   const [loading, setLoading] = React.useState(false)
+
+  React.useEffect(() => {
+    setIsMac(isMacOs())
+  }, [])
 
   React.useEffect(() => {
     if (debouncedQuery.length <= 0) {
@@ -80,13 +85,14 @@ export function ProductsCombobox() {
         <span className="hidden xl:inline-flex">Search products...</span>
         <span className="sr-only">Search products</span>
         <Kbd
-          title={isMacOs() ? "Command" : "Control"}
+          title={isMac ? "Command" : "Control"}
           className="pointer-events-none absolute right-1.5 top-1.5 hidden xl:block"
         >
-          {isMacOs() ? "⌘" : "Ctrl"} K
+          {isMac ? "⌘" : "Ctrl"} K
         </Kbd>
       </Button>
       <CommandDialog
+        shouldFilter={false}
         open={open}
         onOpenChange={(open) => {
           setOpen(open)

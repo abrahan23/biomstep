@@ -30,6 +30,7 @@ export function UpdateCart({ cartLineItem }: UpdateCartProps) {
               try {
                 await updateCartItem({
                   productId: cartLineItem.id,
+                  variant: cartLineItem.variant ?? undefined,
                   quantity: Number(cartLineItem.quantity) - 1,
                 })
               } catch (err) {
@@ -53,6 +54,7 @@ export function UpdateCart({ cartLineItem }: UpdateCartProps) {
               try {
                 await updateCartItem({
                   productId: cartLineItem.id,
+                  variant: cartLineItem.variant ?? undefined,
                   quantity: Number(e.target.value),
                 })
               } catch (err) {
@@ -72,6 +74,7 @@ export function UpdateCart({ cartLineItem }: UpdateCartProps) {
               try {
                 await updateCartItem({
                   productId: cartLineItem.id,
+                  variant: cartLineItem.variant ?? undefined,
                   quantity: Number(cartLineItem.quantity) + 1,
                 })
               } catch (err) {
@@ -95,6 +98,7 @@ export function UpdateCart({ cartLineItem }: UpdateCartProps) {
             try {
               await deleteCartItem({
                 productId: cartLineItem.id,
+                variant: cartLineItem.variant ?? undefined,
               })
             } catch (err) {
               showErrorToast(err)

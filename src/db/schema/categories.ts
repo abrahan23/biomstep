@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm"
-import { pgTable, text, varchar } from "drizzle-orm/pg-core"
+import { integer, pgTable, text, varchar } from "drizzle-orm/pg-core"
 
 import { generateId } from "@/lib/id"
 
@@ -15,6 +15,7 @@ export const categories = pgTable("categories", {
   slug: text("slug").notNull().unique(),
   image: text("image"),
   description: text("description"),
+  sortOrder: integer("sort_order").notNull().default(0),
   ...lifecycleDates,
 })
 

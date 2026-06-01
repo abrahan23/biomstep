@@ -39,7 +39,7 @@ export function JoinNewsletterForm() {
         body: JSON.stringify({
           email: data.email,
           token: crypto.randomUUID(),
-          subject: "Welcome to Skateshop13",
+          subject: "Welcome to Biomstep",
         }),
       })
 

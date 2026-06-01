@@ -2,12 +2,12 @@ import { env } from "@/env.js"
 import { loadStripe, type Stripe } from "@stripe/stripe-js"
 
 let stripePromise: Promise<Stripe | null>
-export function getStripe(stripeAccountId?: string) {
-  if (!void stripePromise) {
-    stripePromise = loadStripe(
-      env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
-      stripeAccountId ? { stripeAccount: stripeAccountId } : undefined
-    )
+
+// Single-store e-commerce: all charges go to the platform account, so no
+// connected-account context is needed when loading Stripe.js.
+export function getStripe() {
+  if (!stripePromise) {
+    stripePromise = loadStripe(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
   }
   return stripePromise
 }

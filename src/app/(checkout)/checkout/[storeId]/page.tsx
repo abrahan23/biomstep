@@ -8,7 +8,7 @@ import { ArrowLeftIcon } from "@radix-ui/react-icons"
 import { eq } from "drizzle-orm"
 
 import { getCart } from "@/lib/actions/cart"
-import { createPaymentIntent, getStripeAccount } from "@/lib/actions/stripe"
+import { createPaymentIntent } from "@/lib/actions/stripe"
 import { cn, formatPrice } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer"
@@ -38,7 +38,6 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
     .select({
       id: stores.id,
       name: stores.name,
-      stripeAccountId: stores.stripeAccountId,
     })
     .from(stores)
     .where(eq(stores.id, storeId))
@@ -48,10 +47,6 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
   if (!store) {
     notFound()
   }
-
-  const { isConnected } = await getStripeAccount({
-    storeId,
-  })
 
   const cartLineItems = await getCart({ storeId })
 
@@ -64,33 +59,6 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
     (total, item) => total + Number(item.quantity) * Number(item.price),
     0
   )
-
-  if (!(isConnected && store.stripeAccountId)) {
-    return (
-      <Shell variant="centered">
-        <div className="flex flex-col items-center justify-center gap-2 pt-20">
-          <div className="text-center text-2xl font-bold">
-            Store is not connected to Stripe
-          </div>
-          <div className="text-center text-muted-foreground">
-            Store owner needs to connect their store to Stripe to accept
-            payments
-          </div>
-          <Link
-            aria-label="Back to cart"
-            href="/cart"
-            className={cn(
-              buttonVariants({
-                size: "sm",
-              })
-            )}
-          >
-            Back to cart
-          </Link>
-        </div>
-      </Shell>
-    )
-  }
 
   return (
     <section className="relative flex h-full min-h-dvh flex-col items-start justify-center lg:h-dvh lg:flex-row lg:overflow-hidden">
@@ -107,7 +75,7 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
                 aria-hidden="true"
               />
               <div className="block font-medium transition group-hover:hidden">
-                Skateshop
+                Biomstep
               </div>
               <div className="hidden font-medium transition group-hover:block">
                 Back
@@ -158,7 +126,6 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
       </div>
       <CheckoutShell
         paymentIntentPromise={paymentIntentPromise}
-        storeStripeAccountId={store.stripeAccountId}
         className="size-full flex-1 bg-white pb-12 pt-10 lg:flex-initial lg:pl-12 lg:pt-16"
       >
         <ScrollArea className="h-full">

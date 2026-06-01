@@ -14,7 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 
-import { UpdateProductForm } from "./_components/update-product-form"
+import { UpdateProductForm } from "@/components/forms/update-product-form"
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),

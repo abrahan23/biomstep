@@ -8,8 +8,8 @@ import {
   carts,
   categories,
   orders,
-  payments,
   products,
+  productSkus,
   subcategories,
   type Order,
 } from "@/db/schema"
@@ -29,6 +29,7 @@ import {
 import type Stripe from "stripe"
 import { z } from "zod"
 
+import { STORE_ID } from "@/config/store"
 import {
   checkoutItemSchema,
   type CartLineItemSchema,
@@ -51,45 +52,71 @@ export async function getOrderLineItems(
       throw new Error("Could not parse items.")
     }
 
-    const lineItems = await db
-      .select({
-        id: products.id,
-        name: products.name,
-        images: products.images,
-        price: products.price,
-        inventory: products.inventory,
-        storeId: products.storeId,
-        categoryId: products.categoryId,
-        subcategoryId: products.subcategoryId,
-      })
-      .from(products)
-      .leftJoin(subcategories, eq(products.subcategoryId, subcategories.id))
-      .leftJoin(categories, eq(products.categoryId, categories.id))
-      .where(
-        inArray(
-          products.id,
-          safeParsedItems.data.map((item) => item.productId)
-        )
-      )
-      .groupBy(products.id)
-      .orderBy(desc(products.createdAt))
-      .execute()
-      .then((items) => {
-        return items.map((item) => {
-          const quantity = safeParsedItems.data.find(
-            (checkoutItem) => checkoutItem.productId === item.id
-          )?.quantity
+    const productIds = [
+      ...new Set(safeParsedItems.data.map((item) => item.productId)),
+    ]
 
-          return {
-            ...item,
-            quantity: quantity ?? 0,
-          }
-        })
-      })
+    const productRows = productIds.length
+      ? await db
+          .select({
+            id: products.id,
+            name: products.name,
+            images: products.images,
+            price: products.price,
+            inventory: products.inventory,
+            storeId: products.storeId,
+            category: categories.name,
+            subcategory: subcategories.name,
+          })
+          .from(products)
+          .leftJoin(subcategories, eq(products.subcategoryId, subcategories.id))
+          .leftJoin(categories, eq(products.categoryId, categories.id))
+          .where(inArray(products.id, productIds))
+          .execute()
+      : []
 
-    // Temporary workaround for payment_intent.succeeded webhook event not firing in production
-    // TODO: Remove this once the webhook is working
+    const productMap = new Map(productRows.map((p) => [p.id, p]))
+
+    // Build one line per checkout item so each variant/SKU keeps its own
+    // label, unit price and quantity (products with several variants would
+    // otherwise collapse into a single row).
+    const lineItems: CartLineItemSchema[] = safeParsedItems.data.map((item) => {
+      const product = productMap.get(item.productId)
+
+      return {
+        id: item.productId,
+        name: product?.name ?? "",
+        images: product?.images ?? null,
+        category: product?.category ?? null,
+        subcategory: product?.subcategory ?? null,
+        price: item.price ? String(item.price) : (product?.price ?? "0"),
+        inventory: product?.inventory ?? 0,
+        quantity: item.quantity,
+        variant: item.variant ?? null,
+        skuId: item.skuId ?? null,
+        storeId: product?.storeId ?? STORE_ID,
+        storeName: null,
+        storeStripeAccountId: null,
+      }
+    })
+
+    // Single-store fallback: create the order as soon as the customer lands on
+    // the success page with a succeeded PaymentIntent. This complements the
+    // Stripe webhook (which may not reach localhost during development) and is
+    // idempotent, so it never duplicates an order already created elsewhere.
     if (input.paymentIntent?.status === "succeeded") {
+      const paymentIntentId = input.paymentIntent.id
+
+      // Idempotency guard: bail out if this payment already produced an order.
+      const existingOrder = await db.query.orders.findFirst({
+        columns: { id: true },
+        where: eq(orders.stripePaymentIntentId, paymentIntentId),
+      })
+
+      if (existingOrder) {
+        return lineItems
+      }
+
       const cartId = String(cookies().get("cartId")?.value)
 
       const cart = await db.query.carts.findFirst({
@@ -101,25 +128,10 @@ export async function getOrderLineItems(
         where: eq(carts.id, cartId),
       })
 
-      if (!cart || cart.closed) {
-        return lineItems
-      }
-
-      if (!cart.clientSecret || !cart.paymentIntentId) {
-        return lineItems
-      }
-
-      const payment = await db.query.payments.findFirst({
-        columns: {
-          storeId: true,
-          stripeAccountId: true,
-        },
-        where: eq(payments.storeId, input.storeId),
-      })
-
-      if (!payment?.stripeAccountId) {
-        return lineItems
-      }
+      const storeId = input.storeId || STORE_ID
+      const customerEmail = input.paymentIntent.receipt_email ?? ""
+      const customerName = input.paymentIntent.shipping?.name ?? ""
+      const userId = input.paymentIntent.metadata?.userId || null
 
       // Create new address in DB
       const stripeAddress = input.paymentIntent.shipping?.address
@@ -140,21 +152,22 @@ export async function getOrderLineItems(
 
       // Create new order in db
       await db.insert(orders).values({
-        storeId: payment.storeId,
+        storeId,
+        userId,
         items: input.items as unknown as CheckoutItemSchema[],
         quantity: safeParsedItems.data.reduce(
           (acc, item) => acc + item.quantity,
           0
         ),
         amount: String(Number(input.paymentIntent.amount) / 100),
-        stripePaymentIntentId: input.paymentIntent.id,
+        stripePaymentIntentId: paymentIntentId,
         stripePaymentIntentStatus: input.paymentIntent.status,
-        name: input.paymentIntent.shipping?.name ?? "",
-        email: input.paymentIntent.receipt_email ?? "",
+        name: customerName,
+        email: customerEmail,
         addressId: newAddress[0].insertedId,
       })
 
-      // Update product inventory in db
+      // Update product inventory (and per-variant stock when applicable)
       for (const item of safeParsedItems.data) {
         const product = await db.query.products.findFirst({
           columns: {
@@ -164,31 +177,36 @@ export async function getOrderLineItems(
           where: eq(products.id, item.productId),
         })
 
-        if (!product) {
-          return lineItems
-        }
-
-        const inventory = product.inventory - item.quantity
-
-        if (inventory < 0) {
-          return lineItems
-        }
+        if (!product) continue
 
         await db
           .update(products)
           .set({
-            inventory: product.inventory - item.quantity,
+            inventory: Math.max(product.inventory - item.quantity, 0),
           })
           .where(eq(products.id, item.productId))
+
+        // Decrement the selected combination's (SKU) inventory when present.
+        if (item.skuId) {
+          await db
+            .update(productSkus)
+            .set({
+              inventory: sql`GREATEST(${productSkus.inventory} - ${item.quantity}, 0)`,
+            })
+            .where(eq(productSkus.id, item.skuId))
+        }
       }
 
-      await db
-        .update(carts)
-        .set({
-          closed: true,
-          items: [],
-        })
-        .where(eq(carts.paymentIntentId, cart.paymentIntentId))
+      // Close the cart that initiated this payment, if any.
+      if (cart?.paymentIntentId) {
+        await db
+          .update(carts)
+          .set({
+            closed: true,
+            items: [],
+          })
+          .where(eq(carts.paymentIntentId, cart.paymentIntentId))
+      }
     }
 
     return lineItems

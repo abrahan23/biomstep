@@ -67,6 +67,7 @@ export function UpdateProductForm({
   const router = useRouter()
   const [isUpdating, setIsUpdating] = React.useState(false)
   const [isDeleting, setIsDeleting] = React.useState(false)
+  const [uploadDialogOpen, setUploadDialogOpen] = React.useState(false)
   const { uploadFiles, progresses, uploadedFiles, isUploading } = useUploadFile(
     "productImage",
     {
@@ -83,26 +84,69 @@ export function UpdateProductForm({
       subcategoryId: product.subcategoryId,
       price: product.price,
       inventory: product.inventory,
+      images: [],
     },
   })
+
+  async function persistProductImages(files: File[]) {
+    const images = await uploadFiles(files)
+    const values = form.getValues()
+    const result = await updateProduct({
+      ...values,
+      storeId: product.storeId,
+      id: product.id,
+      images,
+    })
+    if (result.error) throw new Error(result.error)
+    form.setValue("images", [])
+    router.refresh()
+    return images
+  }
+
+  async function handleImageUpload(files: File[]) {
+    await toast.promise(persistProductImages(files), {
+      loading:
+        files.length === 1
+          ? "Uploading image..."
+          : `Uploading ${files.length} images...`,
+      success: () => {
+        setUploadDialogOpen(false)
+        return files.length === 1
+          ? "Image saved to product"
+          : `${files.length} images saved to product`
+      },
+      error: (err) => getErrorMessage(err),
+    })
+  }
 
   function onSubmit(input: UpdateProductSchema) {
     setIsUpdating(true)
 
     toast.promise(
-      uploadFiles(input.images ?? []).then(() => {
-        return updateProduct({
-          ...input,
-          storeId: product.storeId,
-          id: product.id,
-        })
-      }),
+      (async () => {
+        const pendingImages = input.images ?? []
+        const images =
+          pendingImages.length > 0
+            ? await persistProductImages(pendingImages)
+            : await uploadFiles([])
+
+        if (pendingImages.length === 0) {
+          const { images: _files, ...rest } = input
+          const result = await updateProduct({
+            ...rest,
+            storeId: product.storeId,
+            id: product.id,
+            images,
+          })
+          if (result.error) throw new Error(result.error)
+          router.refresh()
+        }
+      })(),
       {
-        loading: "Uploading images...",
+        loading: "Saving product...",
         success: () => {
-          form.reset()
           setIsUpdating(false)
-          return "Images uploaded"
+          return "Product updated"
         },
         error: (err) => {
           setIsUpdating(false)
@@ -249,28 +293,49 @@ export function UpdateProductForm({
           control={form.control}
           name="images"
           render={({ field }) => (
-            <div className="space-y-6">
+            <div className="space-y-4">
               <FormItem className="w-full">
                 <FormLabel>Images</FormLabel>
+                <p className="text-sm text-muted-foreground">
+                  {uploadedFiles.length > 0
+                    ? `${uploadedFiles.length} image${uploadedFiles.length === 1 ? "" : "s"} on this product.`
+                    : "No images yet."}{" "}
+                  Select files below — they upload and save automatically.
+                </p>
                 <FormControl>
-                  <Dialog>
+                  <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button variant="outline">Upload files</Button>
+                      <Button type="button" variant="outline" disabled={isUploading}>
+                        {isUploading ? (
+                          <>
+                            <Icons.spinner
+                              className="mr-2 size-4 animate-spin"
+                              aria-hidden="true"
+                            />
+                            Uploading...
+                          </>
+                        ) : (
+                          "Add images"
+                        )}
+                      </Button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-xl">
                       <DialogHeader>
-                        <DialogTitle>Upload files</DialogTitle>
+                        <DialogTitle>Add product images</DialogTitle>
                         <DialogDescription>
-                          Drag and drop your files here or click to browse.
+                          Drag and drop or browse. Images upload to the server
+                          as soon as you select them.
                         </DialogDescription>
                       </DialogHeader>
                       <FileUploader
                         value={field.value ?? []}
                         onValueChange={field.onChange}
+                        onUpload={handleImageUpload}
+                        suppressUploadToast
                         maxFiles={4}
                         maxSize={4 * 1024 * 1024}
                         progresses={progresses}
-                        disabled={isUploading}
+                        disabled={isUploading || isUpdating}
                       />
                     </DialogContent>
                   </Dialog>
@@ -284,7 +349,7 @@ export function UpdateProductForm({
           )}
         />
         <div className="flex space-x-2">
-          <Button disabled={isDeleting || isUpdating}>
+          <Button type="submit" disabled={isDeleting || isUpdating || isUploading}>
             {isUpdating && (
               <Icons.spinner
                 className="mr-2 size-4 animate-spin"
@@ -295,6 +360,7 @@ export function UpdateProductForm({
             <span className="sr-only">Update product</span>
           </Button>
           <Button
+            type="button"
             variant="destructive"
             onClick={() => {
               setIsDeleting(true)
@@ -308,7 +374,7 @@ export function UpdateProductForm({
                   loading: "Deleting product...",
                   success: () => {
                     void form.trigger(["name", "price", "inventory"])
-                    router.push(`/dashboard/stores/${product.storeId}/products`)
+                    router.push(`/admin/products`)
                     setIsDeleting(false)
                     return "Product deleted"
                   },

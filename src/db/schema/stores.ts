@@ -16,7 +16,6 @@ import { payments } from "./payments"
 import { products } from "./products"
 import { tags } from "./tags"
 import { lifecycleDates } from "./utils"
-import { variants } from "./variants"
 
 export const storePlanEnum = pgEnum("store_plan", ["free", "standard", "pro"])
 
@@ -45,7 +44,6 @@ export const storesRelations = relations(stores, ({ many }) => ({
   payments: many(payments, { relationName: "storePayments" }),
   customers: many(customers, { relationName: "storeCustomers" }),
   tags: many(tags, { relationName: "storeTags" }),
-  variants: many(variants, { relationName: "storeVariants" }),
 }))
 
 export type Store = typeof stores.$inferSelect

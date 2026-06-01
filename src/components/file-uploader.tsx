@@ -90,6 +90,11 @@ interface FileUploaderProps extends React.HTMLAttributes<HTMLDivElement> {
    * @example disabled
    */
   disabled?: boolean
+  /**
+   * When true, the uploader will not show its own toast — useful when the
+   * parent handles upload feedback (e.g. upload + persist to database).
+   */
+  suppressUploadToast?: boolean
 }
 
 export function FileUploader(props: FileUploaderProps) {
@@ -103,6 +108,7 @@ export function FileUploader(props: FileUploaderProps) {
     maxFiles = 1,
     multiple = false,
     disabled = false,
+    suppressUploadToast = false,
     className,
     ...dropzoneProps
   } = props
@@ -111,6 +117,7 @@ export function FileUploader(props: FileUploaderProps) {
     prop: valueProp,
     onChange: onValueChange,
   })
+  const isUploadingRef = React.useRef(false)
 
   const onDrop = React.useCallback(
     (acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
@@ -140,26 +147,38 @@ export function FileUploader(props: FileUploaderProps) {
         })
       }
 
-      if (
-        onUpload &&
-        updatedFiles.length > 0 &&
-        updatedFiles.length <= maxFiles
-      ) {
-        const target =
-          updatedFiles.length > 0 ? `${updatedFiles.length} files` : `file`
+      if (onUpload && newFiles.length > 0 && !isUploadingRef.current) {
+        isUploadingRef.current = true
 
-        toast.promise(onUpload(updatedFiles), {
-          loading: `Uploading ${target}...`,
-          success: () => {
-            setFiles([])
-            return `${target} uploaded`
-          },
-          error: `Failed to upload ${target}`,
-        })
+        const runUpload = () =>
+          onUpload(newFiles)
+            .then(() => {
+              setFiles((current) =>
+                current?.filter(
+                  (file) => !newFiles.some((uploaded) => uploaded === file)
+                ) ?? []
+              )
+            })
+            .finally(() => {
+              isUploadingRef.current = false
+            })
+
+        if (suppressUploadToast) {
+          void runUpload()
+        } else {
+          toast.promise(runUpload(), {
+            loading: `Uploading ${newFiles.length === 1 ? "file" : `${newFiles.length} files`}...`,
+            success: () =>
+              newFiles.length === 1
+                ? "File uploaded"
+                : `${newFiles.length} files uploaded`,
+            error: `Failed to upload ${newFiles.length === 1 ? "file" : "files"}`,
+          })
+        }
       }
     },
 
-    [files, maxFiles, multiple, onUpload, setFiles]
+    [files, maxFiles, multiple, onUpload, setFiles, suppressUploadToast]
   )
 
   function onRemove(index: number) {

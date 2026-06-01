@@ -1,5 +1,5 @@
 {
-  "name": "skateshop",
+  "name": "biomstep",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -60,7 +60,7 @@
     "@tanstack/match-sorter-utils": "^8.15.1",
     "@tanstack/react-table": "^8.19.3",
     "@tremor/react": "^3.17.4",
-    "@uploadthing/react": "^6.7.2",
+    "@uploadthing/react": "^7.3.3",
     "@upstash/ratelimit": "^1.2.1",
     "@upstash/redis": "^1.32.0",
     "ai": "^3.2.22",
@@ -101,7 +101,7 @@
     "stripe": "^16.2.0",
     "tailwind-merge": "^2.4.0",
     "tailwindcss-animate": "^1.0.7",
-    "uploadthing": "^6.13.2",
+    "uploadthing": "^7.7.4",
     "vaul": "^0.9.1",
     "zod": "^3.23.8"
   },

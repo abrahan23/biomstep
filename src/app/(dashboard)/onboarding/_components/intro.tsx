@@ -40,7 +40,7 @@ export function Intro() {
               },
             }}
           >
-            Welcome to Skateshop
+            Welcome to Biomstep
           </motion.h1>
           <motion.p
             className="max-w-md text-muted-foreground transition-colors sm:text-lg"

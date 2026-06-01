@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 
-import { CreateProductForm } from "./_components/create-product-form"
+import { CreateProductForm } from "@/components/forms/create-product-form"
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.NEXT_PUBLIC_APP_URL),
