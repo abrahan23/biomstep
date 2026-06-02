@@ -21,7 +21,7 @@ export async function HomeBestSellers({ products }: HomeBestSellersProps) {
 
   return (
     <section
-      className="py-16 md:py-20 lg:py-24"
+      className="relative pt-10 pb-16 md:pt-14 md:pb-20 lg:pb-24"
       aria-labelledby="home-bestsellers-title"
     >
       <HomeSectionHeader
@@ -33,16 +33,16 @@ export async function HomeBestSellers({ products }: HomeBestSellersProps) {
         linkText={t("linkText")}
         titleId="home-bestsellers-title"
       />
-      <div className="mt-10 grid grid-cols-1 gap-5 xs:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-12 grid grid-cols-1 gap-5 xs:grid-cols-2 md:gap-6 lg:grid-cols-4">
         {products.map((product) => (
           <ProductCard
             key={product.id}
             product={product}
-            className="overflow-hidden rounded-xl border border-border/60 bg-card transition-colors duration-300 hover:border-teal-500/25"
+            className="group/card overflow-hidden rounded-2xl border border-border/60 bg-card shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all duration-500 hover:-translate-y-0.5 hover:border-teal-500/40 hover:shadow-[0_24px_50px_-20px_rgba(13,148,136,0.25)] dark:hover:shadow-[0_24px_50px_-20px_rgba(13,148,136,0.4)]"
           />
         ))}
       </div>
-      <div className="mt-8 flex justify-center sm:hidden">
+      <div className="mt-10 flex justify-center sm:hidden">
         <Button
           variant="ghost"
           className="rounded-full text-teal-700 hover:bg-teal-50 hover:text-teal-800 dark:text-teal-400 dark:hover:bg-teal-950/40"

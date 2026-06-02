@@ -151,12 +151,22 @@ export default {
         "tremor-default": ["0.875rem", { lineHeight: "1.25rem" }],
         "tremor-title": ["1.125rem", { lineHeight: "1.75rem" }],
         "tremor-metric": ["1.875rem", { lineHeight: "2.25rem" }],
+        "display-sm": ["2.25rem", { lineHeight: "1.1", letterSpacing: "-0.025em" }],
+        display: ["3rem", { lineHeight: "1.08", letterSpacing: "-0.03em" }],
+        "display-lg": [
+          "3.75rem",
+          { lineHeight: "1.05", letterSpacing: "-0.035em" },
+        ],
       },
       /* */
       fontFamily: {
-        sans: ["var(--font-geist-sans)", ...fontFamily.sans],
+        sans: ["var(--font-sans)", ...fontFamily.sans],
         mono: ["var(--font-geist-mono)", ...fontFamily.mono],
-        heading: ["var(--font-heading)", ...fontFamily.sans],
+        heading: ["var(--font-sans)", ...fontFamily.sans],
+      },
+      letterSpacing: {
+        display: "-0.025em",
+        overline: "0.18em",
       },
       keyframes: {
         "accordion-down": {

@@ -6,11 +6,8 @@ import { getMessages, getTranslations, setRequestLocale } from "next-intl/server
 
 import "@/styles/globals.css"
 
-import { GeistMono } from "geist/font/mono"
-import { GeistSans } from "geist/font/sans"
-
 import { siteConfig } from "@/config/site"
-import { fontHeading } from "@/lib/fonts"
+import { fontMono, fontSans } from "@/lib/fonts"
 import { routing, type Locale } from "@/i18n/routing"
 import { absoluteUrl, cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/toaster"
@@ -88,9 +85,8 @@ export default async function LocaleLayout({
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
-          GeistSans.variable,
-          GeistMono.variable,
-          fontHeading.variable
+          fontSans.variable,
+          fontMono.variable
         )}
       >
         <NextIntlClientProvider messages={messages}>

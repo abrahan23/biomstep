@@ -6,9 +6,10 @@ import { Shell } from "@/components/shell"
 
 import { HomeBenefits } from "./home-benefits"
 import { HomeBestSellers } from "./home-best-sellers"
-import { HomeCategories } from "./home-categories"
+import { HomeBestSellersMotion } from "./home-best-sellers-motion"
+import { HomeCategoriesReveal } from "./home-categories-reveal"
 import { HomeFaq } from "./home-faq"
-import { HomeHero } from "./home-hero"
+import { HomeIntroScroll } from "./home-intro-scroll"
 import { HomeTestimonials } from "./home-testimonials"
 
 interface LobbyProps {
@@ -29,11 +30,21 @@ export async function Lobby({
 
   return (
     <>
-      <HomeHero videoUrl={heroVideoUrl} />
+      <HomeIntroScroll
+        videoUrl={heroVideoUrl}
+        categoriesReveal={
+          <HomeCategoriesReveal categories={categories} />
+        }
+      />
       <div className="relative z-10 bg-background">
-        <Shell className="max-w-6xl gap-0">
-          <HomeCategories categories={categories} />
-          <HomeBestSellers products={bestSellingProducts} />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 -top-32 h-32 bg-gradient-to-b from-[#070b12]/50 via-[#070b12]/15 to-background"
+        />
+        <Shell className="max-w-6xl gap-0 pt-0">
+          <HomeBestSellersMotion className="-mt-[14vh] md:-mt-[18vh]">
+            <HomeBestSellers products={bestSellingProducts} />
+          </HomeBestSellersMotion>
           <HomeBenefits />
           <HomeTestimonials />
           <HomeFaq />

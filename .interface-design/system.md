@@ -29,9 +29,10 @@ Borders-only + surface shifts. Sin sombras dramáticas. Hover: borde teal/20, no
 
 ## Typography
 
-- **Display:** CalSans (`font-heading`) — títulos de sección
-- **Body:** Geist Sans — descripciones
-- **Data/labels:** Geist Mono — números de sección, contadores
+- **UI + títulos:** Plus Jakarta Sans (`font-sans` / `font-heading`) — misma familia; títulos en 600–800
+- **Data/labels:** Geist Mono (`font-mono`) — números de sección, precios, contadores
+- **Escala display:** `text-display-sm` / `text-display` / `text-display-lg` con `tracking-display`
+- **Overlines:** `tracking-overline` en eyebrows y badges de sección
 
 ## Spacing
 

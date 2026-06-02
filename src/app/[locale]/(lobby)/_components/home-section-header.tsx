@@ -45,7 +45,11 @@ export function HomeSectionHeader({
               centered && "justify-center"
             )}
           >
-            <span className="font-mono text-[11px] font-medium tracking-[0.2em] text-teal-600 dark:text-teal-400">
+            <span className="inline-flex items-center gap-1.5 font-mono text-[11px] font-semibold tracking-overline text-teal-600 dark:text-teal-400">
+              <span
+                aria-hidden="true"
+                className="inline-block size-1 rounded-full bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.6)]"
+              />
               {sectionNumber}
             </span>
             <span
@@ -55,13 +59,13 @@ export function HomeSectionHeader({
           </div>
         ) : null}
         {eyebrow ? (
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-teal-700/80 dark:text-teal-400/90">
+          <p className="text-xs font-semibold uppercase tracking-overline text-teal-700/80 dark:text-teal-400/90">
             {eyebrow}
           </p>
         ) : null}
         <h2
           id={titleId}
-          className="font-heading text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl"
+          className="font-heading text-balance text-3xl font-semibold leading-[1.1] tracking-tight text-foreground md:text-[2.5rem] md:tracking-[-0.025em]"
         >
           {title}
         </h2>
@@ -75,14 +79,17 @@ export function HomeSectionHeader({
         <Button
           variant="outline"
           className={cn(
-            "shrink-0 rounded-full border-teal-200/80 px-5 text-foreground hover:border-teal-300 hover:bg-teal-50/50 dark:border-teal-800 dark:hover:bg-teal-950/30",
+            "group/cta shrink-0 rounded-full border-teal-200/80 px-5 text-foreground transition-all duration-300 hover:border-teal-400/70 hover:bg-teal-50/60 hover:text-teal-800 hover:shadow-[0_8px_24px_-12px_rgba(13,148,136,0.4)] dark:border-teal-800 dark:hover:bg-teal-950/40 dark:hover:text-teal-300",
             centered && "mx-auto"
           )}
           asChild
         >
           <Link href={href}>
             {linkText}
-            <ArrowRightIcon className="ml-2 size-4" aria-hidden="true" />
+            <ArrowRightIcon
+              className="ml-2 size-4 transition-transform duration-300 group-hover/cta:translate-x-0.5"
+              aria-hidden="true"
+            />
           </Link>
         </Button>
       ) : null}
