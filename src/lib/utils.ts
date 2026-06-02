@@ -3,6 +3,8 @@ import type { User } from "@clerk/nextjs/server"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
+import { storeConfig } from "@/config/store"
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
@@ -11,16 +13,37 @@ export function absoluteUrl(path: string) {
   return `${env.NEXT_PUBLIC_APP_URL}${path}`
 }
 
+const priceLocales: Record<string, string> = {
+  es: "es-ES",
+  en: "en-GB",
+}
+
 export function formatPrice(
   price: number | string,
+  opts: Intl.NumberFormatOptions & { locale?: string } = {}
+) {
+  const { locale, currency, notation, ...intlOpts } = opts
+
+  return new Intl.NumberFormat(locale ?? storeConfig.priceLocale, {
+    style: "currency",
+    currency: (currency ?? storeConfig.currency).toUpperCase(),
+    notation: notation ?? "standard",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+    ...intlOpts,
+  }).format(Number(price))
+}
+
+/** Formatea un precio según el locale de la ruta (`es` | `en`). */
+export function formatPriceForLocale(
+  price: number | string,
+  locale: string,
   opts: Intl.NumberFormatOptions = {}
 ) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: opts.currency ?? "USD",
-    notation: opts.notation ?? "compact",
+  return formatPrice(price, {
+    locale: priceLocales[locale] ?? storeConfig.priceLocale,
     ...opts,
-  }).format(Number(price))
+  })
 }
 
 export function formatNumber(

@@ -1,17 +1,17 @@
 "use client"
 
 import * as React from "react"
-import { useTranslations } from "next-intl"
+import { Link } from "@/i18n/routing"
+import { ChevronDownIcon } from "@radix-ui/react-icons"
 import {
   motion,
   useMotionValueEvent,
   useScroll,
   useTransform,
 } from "framer-motion"
-import { ChevronDownIcon } from "@radix-ui/react-icons"
+import { useTranslations } from "next-intl"
 
 import { storeConfig } from "@/config/store"
-import { Link } from "@/i18n/routing"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
@@ -20,26 +20,35 @@ import { mapRange } from "./home-scroll-utils"
 import { ScrollScrubVideo } from "./scroll-scrub-video"
 
 const SCROLL_VH_PER_SECOND = 20
-const MIN_SCROLL_TRACK_VH = 180
+const MIN_SCROLL_TRACK_VH = 140
 const DEFAULT_VIDEO_DURATION = 10
-/** Altura extra de scroll para revelar categorías sobre el vídeo. */
-const CATEGORIES_REVEAL_VH = 55
+/** Scroll extra tras el scrub del vídeo para revelar categorías. */
+const CATEGORIES_REVEAL_VH = 28
+/** Dónde empiezan las categorías dentro del tramo de vídeo (0–1). */
+const CATEGORIES_TOP_RATIO = 0.5
 interface HomeIntroScrollProps {
   videoUrl?: string
+  posterUrl?: string
   categoriesReveal: React.ReactNode
 }
 
 export function HomeIntroScroll({
   videoUrl,
+  posterUrl,
   categoriesReveal,
 }: HomeIntroScrollProps) {
   const t = useTranslations("Home.hero")
   const tCommon = useTranslations("Common")
   const containerRef = React.useRef<HTMLDivElement>(null)
-  const [videoDuration, setVideoDuration] = React.useState(DEFAULT_VIDEO_DURATION)
+  const [videoDuration, setVideoDuration] = React.useState(
+    DEFAULT_VIDEO_DURATION
+  )
 
   const videoScrollVh = videoUrl
-    ? Math.max(MIN_SCROLL_TRACK_VH, Math.ceil(videoDuration * SCROLL_VH_PER_SECOND))
+    ? Math.max(
+        MIN_SCROLL_TRACK_VH,
+        Math.ceil(videoDuration * SCROLL_VH_PER_SECOND)
+      )
     : 140
 
   const totalScrollVh = videoUrl
@@ -80,20 +89,41 @@ export function HomeIntroScroll({
     }
   }, [totalScrollVh, videoUrl])
 
-  const categoriesPhaseEnd =
-    (videoScrollVh + CATEGORIES_REVEAL_VH) / totalScrollVh
-
   const heroRiseStart = videoPhaseEnd * 0.22
   const heroRiseEnd = videoPhaseEnd * 0.46
   const heroFadeStart = videoPhaseEnd * 0.44
   const heroFadeEnd = videoPhaseEnd * 0.56
 
-  const categoriesStart = videoPhaseEnd * 0.52
-  const categoriesEnd = categoriesPhaseEnd * 0.9
+  const categoriesRevealShare = CATEGORIES_REVEAL_VH / totalScrollVh
+  const categoriesStart = videoPhaseEnd * 0.5
+  const categoriesEnd = Math.min(
+    0.97,
+    videoPhaseEnd + categoriesRevealShare * 0.85
+  )
 
-  const heroTextY = mapRange(scrollProgress, heroRiseStart, heroRiseEnd, 0, -280)
-  const heroTextOpacity = mapRange(scrollProgress, heroFadeStart, heroFadeEnd, 1, 0)
-  const heroCtasOpacity = mapRange(scrollProgress, heroFadeStart * 0.95, heroFadeEnd, 1, 0)
+  const categoriesTopVh = Math.round(videoScrollVh * CATEGORIES_TOP_RATIO)
+
+  const heroTextY = mapRange(
+    scrollProgress,
+    heroRiseStart,
+    heroRiseEnd,
+    0,
+    -280
+  )
+  const heroTextOpacity = mapRange(
+    scrollProgress,
+    heroFadeStart,
+    heroFadeEnd,
+    1,
+    0
+  )
+  const heroCtasOpacity = mapRange(
+    scrollProgress,
+    heroFadeStart * 0.95,
+    heroFadeEnd,
+    1,
+    0
+  )
   const videoScaleValue = mapRange(
     Math.min(1, scrollProgress / videoPhaseEnd),
     0,
@@ -101,7 +131,13 @@ export function HomeIntroScroll({
     1,
     1.06
   )
-  const categoriesY = mapRange(scrollProgress, categoriesStart, categoriesEnd, 72, 0)
+  const categoriesY = mapRange(
+    scrollProgress,
+    categoriesStart,
+    categoriesEnd,
+    72,
+    0
+  )
 
   const videoComplete = scrollProgress >= videoPhaseEnd * 0.98
 
@@ -127,6 +163,7 @@ export function HomeIntroScroll({
           >
             <ScrollScrubVideo
               src={videoUrl}
+              poster={posterUrl}
               scrollProgress={videoScrollProgress}
               onDurationReady={setVideoDuration}
               className="size-full object-cover"
@@ -152,7 +189,7 @@ export function HomeIntroScroll({
                 {t("badge")}
               </Badge>
               <div className="space-y-4">
-                <h1 className="font-heading text-balance text-display font-bold tracking-display drop-shadow-[0_2px_24px_rgba(0,0,0,0.45)] sm:text-display-lg">
+                <h1 className="text-balance font-heading text-display font-bold tracking-display drop-shadow-[0_2px_24px_rgba(0,0,0,0.45)] sm:text-display-lg">
                   {t("title")}
                 </h1>
                 <p className="max-w-lg text-pretty text-base text-white/90 drop-shadow-sm sm:text-lg">
@@ -205,15 +242,14 @@ export function HomeIntroScroll({
       <motion.div
         className="pointer-events-none absolute inset-x-0 z-20 flex min-h-0 items-center"
         style={{
-          top: `calc(100dvh + ${Math.round(videoScrollVh * 0.32)}vh)`,
+          top: `calc(100dvh + ${categoriesTopVh}vh)`,
           y: categoriesY,
         }}
       >
-        <div className="pointer-events-auto container w-full">
+        <div className="container pointer-events-auto w-full">
           {categoriesReveal}
         </div>
       </motion.div>
-
     </div>
   )
 }

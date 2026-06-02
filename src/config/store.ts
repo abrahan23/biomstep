@@ -11,6 +11,11 @@ export const storeConfig = {
   slug: "default",
   name: "BIOMSTEP",
   description: "La tienda oficial de BIOMSTEP.",
+  currency: "EUR",
+  priceLocale: "es-ES",
 } as const
+
+/** Código ISO en minúsculas para la API de Stripe. */
+export const stripeCurrency = storeConfig.currency.toLowerCase() as "eur"
 
 export const STORE_ID = storeConfig.id

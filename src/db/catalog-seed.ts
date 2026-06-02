@@ -26,7 +26,7 @@ export const catalogSeed = {
       name: "Plantillas",
       slug: "plantillas",
       description: "Plantillas para el ayudar terminados en uso",
-      image: "/images/categories/skateboard-one.webp",
+      image: "/images/categories/insoles.png",
       subcategories: [
         {
           id: "xrsVByrhapog",
@@ -59,7 +59,7 @@ export const catalogSeed = {
       name: "Protecciones deportivas",
       slug: "protecciones-deportivas",
       description: "Protecciones deportivas para evitar lesiones",
-      image: "/images/categories/clothing-one.webp",
+      image: "/images/categories/sport-protection.png",
       subcategories: [],
     },
     {
@@ -67,7 +67,7 @@ export const catalogSeed = {
       name: "Modelos anatómicos",
       slug: "modelos-anatomicos",
       description: "Modelos anatómicos impresos en 3D",
-      image: "/images/categories/shoes-one.webp",
+      image: "/images/categories/anatomical-models.png",
       subcategories: [
         {
           id: "zgXEW7zQ64LS",
@@ -82,7 +82,7 @@ export const catalogSeed = {
       name: "Biomstep Lab",
       slug: "biomstep-lab",
       description: "Productos de BIOMSTEP Lab.",
-      image: "/images/categories/backpack-one.webp",
+      image: "/images/categories/biomstep-lab.png",
       subcategories: [
         {
           id: "mkgq1FEEX0Mr",

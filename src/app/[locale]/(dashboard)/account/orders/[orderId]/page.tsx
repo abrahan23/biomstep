@@ -99,7 +99,7 @@ export default async function AccountOrderPage({
   const statusLabel = t.has(statusKey) ? t(statusKey) : status
 
   return (
-    <Shell variant="sidebar">
+    <Shell>
       <PageHeader>
         <Link
           href="/account"

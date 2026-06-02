@@ -21,7 +21,7 @@ export async function HomeBestSellers({ products }: HomeBestSellersProps) {
 
   return (
     <section
-      className="relative pt-10 pb-16 md:pt-14 md:pb-20 lg:pb-24"
+      className="relative pt-8 pb-16 md:pt-10 md:pb-20 lg:pb-24"
       aria-labelledby="home-bestsellers-title"
     >
       <HomeSectionHeader

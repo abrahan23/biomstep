@@ -10,7 +10,7 @@ import { db } from "@/db"
 import { carts, orders, products } from "@/db/schema"
 import { desc, eq, inArray } from "drizzle-orm"
 
-import { STORE_ID } from "@/config/store"
+import { STORE_ID, stripeCurrency } from "@/config/store"
 import { calculateOrderAmount } from "@/lib/checkout"
 import { stripe } from "@/lib/stripe"
 import type { CheckoutItemSchema } from "@/lib/validations/cart"
@@ -56,7 +56,7 @@ async function main() {
 
   const paymentIntent = await stripe.paymentIntents.create({
     amount: total,
-    currency: "usd",
+    currency: stripeCurrency,
     metadata: {
       cartId: cart.id,
       storeId: STORE_ID,

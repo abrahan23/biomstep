@@ -14,6 +14,7 @@ import { eq, inArray, sql } from "drizzle-orm"
 import type Stripe from "stripe"
 import { z } from "zod"
 
+import { stripeCurrency } from "@/config/store"
 import { stripe } from "@/lib/stripe"
 import {
   checkoutItemSchema,
@@ -314,7 +315,7 @@ async function createInvoiceForOrder({
     await stripe.invoiceItems.create({
       customer: customer.id,
       amount: Math.round(item.price * item.quantity * 100),
-      currency: "usd",
+      currency: stripeCurrency,
       description: `${item.quantity} × ${
         productNameById.get(item.productId) ?? "Product"
       }`,

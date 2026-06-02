@@ -18,6 +18,7 @@ export default async function IndexPage({ params: { locale } }: IndexPageProps) 
 
   const heroVideoUrl =
     env.NEXT_PUBLIC_HERO_VIDEO_URL ?? homeConfig.hero.videoSrc
+  const heroPosterUrl = homeConfig.hero.posterSrc
   const bestSellingPromise = getBestSellingProducts()
   const categoriesPromise = getCategories()
 
@@ -25,6 +26,7 @@ export default async function IndexPage({ params: { locale } }: IndexPageProps) 
     <React.Suspense fallback={<LobbySkeleton />}>
       <Lobby
         heroVideoUrl={heroVideoUrl}
+        heroPosterUrl={heroPosterUrl}
         bestSellingPromise={bestSellingPromise}
         categoriesPromise={categoriesPromise}
       />

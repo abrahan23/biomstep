@@ -60,7 +60,7 @@ export default async function AccountPage() {
     .orderBy(desc(orders.createdAt))
 
   return (
-    <Shell variant="sidebar">
+    <Shell>
       <PageHeader>
         <PageHeaderHeading size="sm">{t("ordersTitle")}</PageHeaderHeading>
         <PageHeaderDescription size="sm">

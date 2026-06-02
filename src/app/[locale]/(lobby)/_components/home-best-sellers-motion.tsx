@@ -20,7 +20,7 @@ export function HomeBestSellersMotion({
     offset: ["start end", "start 0.42"],
   })
 
-  const y = useTransform(scrollYProgress, [0, 1], [140, 0])
+  const y = useTransform(scrollYProgress, [0, 1], [100, 0])
 
   return (
     <motion.div ref={ref} style={{ y }} className={className}>

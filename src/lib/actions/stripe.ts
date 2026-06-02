@@ -15,7 +15,7 @@ import type Stripe from "stripe"
 import { type z } from "zod"
 
 import { pricingConfig } from "@/config/pricing"
-import { STORE_ID } from "@/config/store"
+import { STORE_ID, stripeCurrency } from "@/config/store"
 import { calculateOrderAmount } from "@/lib/checkout"
 import { getErrorMessage } from "@/lib/handle-error"
 import { stripe } from "@/lib/stripe"
@@ -465,7 +465,7 @@ export async function createPaymentIntent(
     // payment methods configured from the Stripe Dashboard.
     const paymentIntent = await stripe.paymentIntents.create({
       amount: total,
-      currency: "usd",
+      currency: stripeCurrency,
       metadata,
       receipt_email: user ? getUserEmail(user) : undefined,
       automatic_payment_methods: {

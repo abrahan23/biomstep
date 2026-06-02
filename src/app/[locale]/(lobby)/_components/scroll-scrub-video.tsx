@@ -7,9 +7,12 @@ import {
   useScroll,
 } from "framer-motion"
 
+import { useVideoPoster } from "./use-video-poster"
+
 interface ScrollScrubVideoProps {
   src: string
   scrollProgress: ReturnType<typeof useScroll>["scrollYProgress"]
+  poster?: string
   className?: string
   onDurationReady?: (duration: number) => void
 }
@@ -17,10 +20,12 @@ interface ScrollScrubVideoProps {
 export function ScrollScrubVideo({
   src,
   scrollProgress,
+  poster,
   className,
   onDurationReady,
 }: ScrollScrubVideoProps) {
   const videoRef = React.useRef<HTMLVideoElement>(null)
+  const posterUrl = useVideoPoster(src, poster)
   const reduceMotion = useReducedMotion()
   const [ready, setReady] = React.useState(false)
   const rafRef = React.useRef<number | null>(null)
@@ -74,6 +79,7 @@ export function ScrollScrubVideo({
       muted
       playsInline
       preload="auto"
+      poster={posterUrl}
       aria-hidden="true"
       className={className}
       onLoadedMetadata={(event) => {
