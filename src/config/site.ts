@@ -38,32 +38,27 @@ export const siteConfig = {
   links,
   footerNav: [
     {
-      title: "Credits",
+      title: "Categorías",
       items: [
         {
-          title: "OneStopShop",
-          href: "https://onestopshop.jackblatch.com",
-          external: true,
+          title: "Plantillas",
+          href: "/collections/insoles",
+          external: false,
         },
         {
-          title: "Acme Corp",
-          href: "https://acme-corp.jumr.dev",
-          external: true,
+          title: "Protección deportiva",
+          href: "/collections/sport-protection",
+          external: false,
         },
         {
-          title: "craft.mxkaske.dev",
-          href: "https://craft.mxkaske.dev",
-          external: true,
+          title: "Modelos anatómicos",
+          href: "/collections/anatomical-models",
+          external: false,
         },
         {
-          title: "Taxonomy",
-          href: "https://tx.shadcn.com/",
-          external: true,
-        },
-        {
-          title: "shadcn/ui",
-          href: "https://ui.shadcn.com",
-          external: true,
+          title: "BIOMSTEP Lab",
+          href: "/collections/biomstep-lab",
+          external: false,
         },
       ],
     },

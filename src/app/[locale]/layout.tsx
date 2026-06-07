@@ -49,18 +49,16 @@ export async function generateMetadata({
       images: [`${siteConfig.url}/og.jpg`],
     },
     icons: {
-      icon: "/icon.png",
+      icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+      shortcut: "/icon.svg",
     },
     manifest: absoluteUrl("/site.webmanifest"),
   }
 }
 
 export const viewport: Viewport = {
-  colorScheme: "dark light",
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "white" },
-    { media: "(prefers-color-scheme: dark)", color: "black" },
-  ],
+  colorScheme: "dark",
+  themeColor: "#000000",
 }
 
 interface LocaleLayoutProps {
@@ -80,7 +78,7 @@ export default async function LocaleLayout({
   const messages = await getMessages()
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} className="dark" suppressHydrationWarning>
       <head />
       <body
         className={cn(
@@ -92,8 +90,7 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider
             attribute="class"
-            defaultTheme="system"
-            enableSystem
+            forcedTheme="dark"
             disableTransitionOnChange
           >
             {children}

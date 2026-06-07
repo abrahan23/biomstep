@@ -1,14 +1,19 @@
 {
   "name": "Biomstep",
-  "short_name": "Biomstep",
+  "short_name": "BIOMSTEP",
   "icons": [
     {
-      "src": "/icon.png",
+      "src": "/icon",
       "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-icon",
+      "sizes": "180x180",
       "type": "image/png"
     }
   ],
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff",
+  "theme_color": "#070b12",
+  "background_color": "#070b12",
   "display": "standalone"
 }

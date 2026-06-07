@@ -13,15 +13,11 @@ import { HomeIntroScroll } from "./home-intro-scroll"
 import { HomeTestimonials } from "./home-testimonials"
 
 interface LobbyProps {
-  heroVideoUrl?: string
-  heroPosterUrl?: string
   bestSellingPromise: ReturnType<typeof getBestSellingProducts>
   categoriesPromise: ReturnType<typeof getCategories>
 }
 
 export async function Lobby({
-  heroVideoUrl,
-  heroPosterUrl,
   bestSellingPromise,
   categoriesPromise,
 }: LobbyProps) {
@@ -33,8 +29,6 @@ export async function Lobby({
   return (
     <>
       <HomeIntroScroll
-        videoUrl={heroVideoUrl}
-        posterUrl={heroPosterUrl}
         categoriesReveal={<HomeCategoriesReveal categories={categories} />}
       />
       <div className="relative z-10 bg-background">

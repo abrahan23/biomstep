@@ -7,7 +7,6 @@ import { buttonVariants } from "@/components/ui/button"
 import { Icons } from "@/components/icons"
 import { JoinNewsletterForm } from "@/components/join-newsletter-form"
 import { LocaleSwitcher } from "@/components/layouts/locale-switcher"
-import { ModeToggle } from "@/components/layouts/mode-toggle"
 import { Shell } from "@/components/shell"
 import { SiteLogo } from "@/components/site-logo"
 
@@ -103,7 +102,6 @@ export async function SiteFooter() {
               <Icons.gitHub className="size-4" aria-hidden="true" />
               <span className="sr-only">GitHub</span>
             </Link>
-            <ModeToggle />
           </div>
         </section>
       </Shell>

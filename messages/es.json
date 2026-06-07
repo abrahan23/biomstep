@@ -96,7 +96,7 @@
   "Footer": {
     "newsletterTitle": "Suscríbete a nuestra newsletter",
     "builtBy": "Desarrollado por",
-    "credits": "Créditos",
+    "credits": "Categorías",
     "help": "Ayuda",
     "social": "Social",
     "about": "Sobre nosotros",
@@ -162,19 +162,54 @@
         "description": "Profesionales y deportistas que confían en BIOMSTEP.",
         "items": [
           {
-            "quote": "Las plantillas deportivas cambiaron mi sensación en carrera. Menos fatiga en metatarsos y mejor estabilidad en apoyo.",
+            "quote": "Llevo dos temporadas usando las plantillas de running y la diferencia es brutal. Antes terminaba los 10 km con el pie derecho destrozado, ahora llego fresca. No volvería a correr sin ellas.",
             "author": "Laura M.",
-            "role": "Corredora amateur"
+            "role": "Corredora popular, Madrid"
           },
           {
-            "quote": "Los modelos anatómicos de pie son una herramienta excelente para explicar procedimientos a mis pacientes.",
-            "author": "Dr. García",
-            "role": "Podólogo clínico"
+            "quote": "Uso los modelos anatómicos en consulta desde hace ocho meses. Mis pacientes entienden mucho mejor la fascitis plantar cuando pueden ver y tocar la estructura. Ha mejorado notablemente la adherencia al tratamiento.",
+            "author": "Dr. Javier García",
+            "role": "Podólogo clínico, Barcelona"
           },
           {
-            "quote": "Compré plantillas para hostelería y el confort en jornadas largas de pie es notable desde la primera semana.",
+            "quote": "Trabajo doce horas de pie en cocina. En el primer mes con las plantillas BIOMSTEP dejé de llegar a casa con los gemelos en llamas. Mi fisio me preguntó qué había cambiado.",
             "author": "Carlos R.",
-            "role": "Cliente BIOMSTEP"
+            "role": "Chef, Sevilla"
+          },
+          {
+            "quote": "Soy fisioterapeuta deportivo y recomiendo BIOMSTEP a mis atletas con sobrepronación. Los resultados son consistentes y el soporte al profesional es excelente.",
+            "author": "Marta S.",
+            "role": "Fisioterapeuta deportiva"
+          },
+          {
+            "quote": "Me diagnosticaron espolón calcáneo hace un año. Con las plantillas ortopédicas y seguimiento de mi podólogo mejoré en seis semanas. El dolor al levantarme por las mañanas desapareció casi del todo.",
+            "author": "Antonio V.",
+            "role": "Administrativo, Valencia"
+          },
+          {
+            "quote": "Entreno triatlón y las plantillas aguantan perfectamente el cambio de ciclismo a carrera. Ningún punto de presión extraño, se adaptan bien a distintas zapatillas.",
+            "author": "Nerea P.",
+            "role": "Triatleta, Bilbao"
+          },
+          {
+            "quote": "Tengo pie plano severo y probé varias marcas antes de llegar a BIOMSTEP. Es la primera que me da estabilidad real sin que me moleste el arco a las dos horas.",
+            "author": "Miguel Á. F.",
+            "role": "Técnico de almacén"
+          },
+          {
+            "quote": "El modelo 3D del pie que pedí para mi TFG en Podología es impresionante en detalle. Llegó bien protegido y a tiempo. Lo usé en la presentación y los profesores me preguntaron dónde lo había conseguido.",
+            "author": "Claudia R.",
+            "role": "Estudiante de Podología, Zaragoza"
+          },
+          {
+            "quote": "Soy maestra y paso seis horas diarias moviéndome por el aula. Desde que uso BIOMSTEP noto menos tensión en la zona lumbar al final del día. No esperaba que unas plantillas influyeran tanto en la espalda.",
+            "author": "Sofía L.",
+            "role": "Docente, Málaga"
+          },
+          {
+            "quote": "Pedí asesoramiento antes de comprar y me orientaron según mi pisada y tipo de actividad. Ese nivel de atención no lo encuentras en ninguna tienda generalista. Las plantillas llegaron en dos días.",
+            "author": "Roberto M.",
+            "role": "Senderista, Granada"
           }
         ]
       },
@@ -207,5 +242,11 @@
     "placeholder": "Buscar productos…",
     "empty": "No se encontraron productos.",
     "shortcut": "Buscar"
+  },
+  "NotFound": {
+    "title": "Pisada en falso",
+    "description": "Esta página no existe o fue movida. Vuelve al inicio para encontrar lo que buscas.",
+    "home": "Volver al inicio",
+    "catalog": "Ver catálogo"
   }
 }

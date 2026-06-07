@@ -3,6 +3,9 @@
 import * as React from "react"
 import { Link } from "@/i18n/routing"
 import { useSelectedLayoutSegment } from "next/navigation"
+import { useAuth } from "@clerk/nextjs"
+import { ExitIcon } from "@radix-ui/react-icons"
+import { useTranslations } from "next-intl"
 import type { MainNavItem } from "@/types"
 
 import { siteConfig } from "@/config/site"
@@ -15,7 +18,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { SiteLogo } from "@/components/site-logo"
@@ -29,6 +32,8 @@ export function MobileNav({ items }: MobileNavProps) {
   const isDesktop = useMediaQuery("(min-width: 1024px)")
   const segment = useSelectedLayoutSegment()
   const [open, setOpen] = React.useState(false)
+  const { isSignedIn } = useAuth()
+  const t = useTranslations("Auth")
 
   if (isDesktop) return null
 
@@ -44,7 +49,7 @@ export function MobileNav({ items }: MobileNavProps) {
           <span className="sr-only">Toggle Menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="pl-1 pr-0 pt-9">
+      <SheetContent side="left" className="flex flex-col pl-1 pr-0 pt-9">
         <div className="flex w-full items-center justify-between px-7">
           <Link
             href="/"
@@ -53,11 +58,11 @@ export function MobileNav({ items }: MobileNavProps) {
           >
             <SiteLogo className="h-5 w-auto" />
             <span className="sr-only">{siteConfig.name}</span>
-            <span className="sr-only">Home</span>
           </Link>
           <LocaleSwitcher />
         </div>
-        <ScrollArea className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
+
+        <ScrollArea className="my-4 flex-1 pl-6">
           <div className="pl-1 pr-7">
             <Accordion type="multiple" className="w-full">
               {items?.map((item, index) => (
@@ -95,6 +100,38 @@ export function MobileNav({ items }: MobileNavProps) {
             </Accordion>
           </div>
         </ScrollArea>
+
+        {/* Auth section at the bottom of the drawer */}
+        <div className="border-t border-border/60 px-7 pb-8 pt-4">
+          {isSignedIn ? (
+            <div className="flex flex-col gap-1">
+              <Link
+                href="/account"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2 rounded-md px-2 py-2 text-sm text-foreground/70 transition-colors hover:bg-accent hover:text-foreground"
+              >
+                <Icons.dollarSign className="size-4" aria-hidden="true" />
+                {t("myOrders")}
+              </Link>
+              <Link
+                href="/signout"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2 rounded-md px-2 py-2 text-sm text-foreground/70 transition-colors hover:bg-accent hover:text-foreground"
+              >
+                <ExitIcon className="size-4" aria-hidden="true" />
+                {t("logOut")}
+              </Link>
+            </div>
+          ) : (
+            <Link
+              href="/signin"
+              onClick={() => setOpen(false)}
+              className={cn(buttonVariants({ size: "sm" }), "w-full")}
+            >
+              {t("signIn")}
+            </Link>
+          )}
+        </div>
       </SheetContent>
     </Sheet>
   )

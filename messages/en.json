@@ -96,7 +96,7 @@
   "Footer": {
     "newsletterTitle": "Subscribe to our newsletter",
     "builtBy": "Built by",
-    "credits": "Credits",
+    "credits": "Categories",
     "help": "Help",
     "social": "Social",
     "about": "About",
@@ -162,19 +162,54 @@
         "description": "Professionals and athletes who trust BIOMSTEP.",
         "items": [
           {
-            "quote": "Sports insoles changed how my feet feel on runs. Less metatarsal fatigue and better stability on landing.",
+            "quote": "I've been using the running insoles for two seasons and the difference is huge. I used to finish 10k runs with my right foot in agony — now I finish strong. I'd never race without them.",
             "author": "Laura M.",
-            "role": "Amateur runner"
+            "role": "Amateur runner, Madrid"
           },
           {
-            "quote": "Anatomical foot models are an excellent tool for explaining procedures to my patients.",
-            "author": "Dr. García",
-            "role": "Clinical podiatrist"
+            "quote": "I've been using the anatomical models in my practice for eight months. Patients understand plantar fasciitis so much better when they can see and touch the structure. Treatment adherence has improved noticeably.",
+            "author": "Dr. Javier García",
+            "role": "Clinical podiatrist, Barcelona"
           },
           {
-            "quote": "I bought insoles for hospitality work and the comfort on long standing shifts was noticeable from week one.",
+            "quote": "I work twelve-hour shifts on my feet in a kitchen. Within the first month with BIOMSTEP insoles I stopped coming home with burning calves. My physio asked what had changed.",
             "author": "Carlos R.",
-            "role": "BIOMSTEP customer"
+            "role": "Head chef, Seville"
+          },
+          {
+            "quote": "I'm a sports physiotherapist and recommend BIOMSTEP to my overpronating athletes consistently. The results are reliable and the professional support is excellent.",
+            "author": "Marta S.",
+            "role": "Sports physiotherapist"
+          },
+          {
+            "quote": "I was diagnosed with heel spur a year ago. With the orthopaedic insoles and my podiatrist's guidance I improved in six weeks. The morning pain on first steps has nearly disappeared.",
+            "author": "Antonio V.",
+            "role": "Office worker, Valencia"
+          },
+          {
+            "quote": "I train triathlon and the insoles hold up perfectly through the bike-to-run transition. No odd pressure points and they fit well in different shoes.",
+            "author": "Nerea P.",
+            "role": "Triathlete, Bilbao"
+          },
+          {
+            "quote": "I have severe flat feet and tried several brands before finding BIOMSTEP. It's the first one that gives me real stability without the arch bothering me after two hours.",
+            "author": "Miguel Á. F.",
+            "role": "Warehouse operative"
+          },
+          {
+            "quote": "The 3D foot model I ordered for my Podiatry dissertation is incredibly detailed. It arrived well packaged and on time. I used it in my presentation and the professors asked where I got it.",
+            "author": "Claudia R.",
+            "role": "Podiatry student, Zaragoza"
+          },
+          {
+            "quote": "I'm a teacher and spend six hours a day moving around the classroom. Since using BIOMSTEP I notice far less lumbar tension by end of day. I didn't expect insoles to have that much impact on my back.",
+            "author": "Sofía L.",
+            "role": "Teacher, Málaga"
+          },
+          {
+            "quote": "I asked for advice before buying and they guided me based on my gait and activity type. That level of care isn't something you find in a general retailer. The insoles arrived in two days.",
+            "author": "Roberto M.",
+            "role": "Hiker, Granada"
           }
         ]
       },
@@ -207,5 +242,11 @@
     "placeholder": "Search products…",
     "empty": "No products found.",
     "shortcut": "Search"
+  },
+  "NotFound": {
+    "title": "Wrong step",
+    "description": "This page doesn't exist or has been moved. Head back home to find what you're looking for.",
+    "home": "Back to home",
+    "catalog": "Browse catalogue"
   }
 }
