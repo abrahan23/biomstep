@@ -70,7 +70,7 @@ function TestimonialCard({
       tabIndex={0}
       onKeyDown={(e) => e.key === "Enter" && onClick()}
       aria-label={`Ver opinión de ${item.author}`}
-      className="absolute cursor-pointer select-none transition-all duration-500 ease-[cubic-bezier(.25,.46,.45,.94)] focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
+      className="group absolute cursor-pointer select-none transition-all duration-500 ease-[cubic-bezier(.25,.46,.45,.94)] focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2"
       style={{
         width: cardWidth,
         height: cardHeight,
@@ -85,12 +85,24 @@ function TestimonialCard({
     >
       <div
         className={cn(
-          "flex h-full flex-col p-6 md:p-7",
+          "relative flex h-full flex-col overflow-hidden p-6 md:p-7",
           isCenter
             ? "bg-gradient-to-br from-teal-600 to-teal-800"
-            : "border border-border/60 bg-card"
+            : "border border-border/70 bg-gradient-to-br from-background to-muted/30 transition-colors duration-500 group-hover:border-teal-500/40 dark:from-background dark:to-teal-950/10"
         )}
       >
+        {!isCenter && (
+          <>
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute -right-16 -top-16 size-48 rounded-full bg-teal-400/0 blur-3xl transition-colors duration-500 group-hover:bg-teal-400/15"
+            />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-teal-500/40 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+            />
+          </>
+        )}
         {/* Header */}
         <div className="mb-5 flex items-center justify-between gap-3">
           <div

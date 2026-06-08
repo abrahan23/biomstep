@@ -52,7 +52,7 @@ export const siteConfig = {
         },
         {
           title: "Modelos anatómicos",
-          href: "/collections/anatomical-models",
+          href: "/collections/modelos-anatomicos",
           external: false,
         },
         {

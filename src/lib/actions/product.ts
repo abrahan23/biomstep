@@ -1,6 +1,6 @@
 "use server"
 
-import { unstable_noStore as noStore, revalidatePath } from "next/cache"
+import { unstable_noStore as noStore, revalidatePath, revalidateTag } from "next/cache"
 import { db } from "@/db"
 import { categories, products } from "@/db/schema"
 import type { StoredFile } from "@/types"
@@ -103,6 +103,8 @@ export async function addProduct(
     })
 
     revalidatePath(`/admin/products`)
+    revalidateTag("best-selling-products")
+    revalidateTag("featured-products")
 
     return {
       data: null,
@@ -146,6 +148,8 @@ export async function updateProduct(
       .where(eq(products.id, id))
 
     revalidatePath(`/admin/products/${input.id}`)
+    revalidateTag("best-selling-products")
+    revalidateTag("featured-products")
 
     return {
       data: null,
@@ -213,6 +217,8 @@ export async function deleteProduct(input: { id: string; storeId: string }) {
     await db.delete(products).where(eq(products.id, input.id))
 
     revalidatePath(`/admin/products`)
+    revalidateTag("best-selling-products")
+    revalidateTag("featured-products")
 
     return {
       data: null,

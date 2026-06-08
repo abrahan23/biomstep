@@ -20,7 +20,8 @@ function getLocaleFromPathname(pathname: string) {
 }
 
 export default clerkMiddleware((auth, req) => {
-  if (req.nextUrl.pathname.startsWith("/api/uploadthing")) {
+  // API routes bypass i18n routing entirely
+  if (req.nextUrl.pathname.startsWith("/api/")) {
     return
   }
 
