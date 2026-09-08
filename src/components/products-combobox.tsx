@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/command"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Icons } from "@/components/icons"
-import { Kbd } from "@/components/kbd"
 
 type ProductGroup = NonNullable<
   Awaited<ReturnType<typeof filterProducts>>["data"]
@@ -78,18 +77,12 @@ export function ProductsCombobox() {
     <>
       <Button
         variant="outline"
-        className="relative size-9 p-0 xl:h-10 xl:w-60 xl:justify-start xl:px-3 xl:py-2"
+        className="size-9 p-0"
+        title={`Search products (${isMac ? "⌘" : "Ctrl"} K)`}
         onClick={() => setOpen(true)}
       >
-        <MagnifyingGlassIcon className="size-4 xl:mr-2" aria-hidden="true" />
-        <span className="hidden xl:inline-flex">Search products...</span>
+        <MagnifyingGlassIcon className="size-4" aria-hidden="true" />
         <span className="sr-only">Search products</span>
-        <Kbd
-          title={isMac ? "Command" : "Control"}
-          className="pointer-events-none absolute right-1.5 top-1.5 hidden xl:block"
-        >
-          {isMac ? "⌘" : "Ctrl"} K
-        </Kbd>
       </Button>
       <CommandDialog
         shouldFilter={false}

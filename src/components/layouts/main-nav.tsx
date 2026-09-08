@@ -24,9 +24,16 @@ interface MainNavProps {
 
 export function MainNav({ items }: MainNavProps) {
   return (
-    <div className="hidden gap-6 lg:flex">
-      <Link href="/" className="hidden items-center lg:flex">
-        <SiteLogo className="h-14 w-auto" priority />
+    <div className="hidden gap-4 lg:flex">
+      {/* The logo SVG has generous vertical padding, so the image is taller
+          than the 64px header bar and the transparent overflow is clipped.
+          `xl:shrink-0` keeps the flex layout from squeezing the logo once the
+          header has room for it (from 1280px). */}
+      <Link
+        href="/"
+        className="hidden h-16 items-center overflow-hidden lg:flex xl:shrink-0"
+      >
+        <SiteLogo className="h-[4.5rem] w-auto" priority />
         <span className="sr-only">{siteConfig.name}</span>
         <span className="sr-only">Home</span>
       </Link>
@@ -72,7 +79,7 @@ export function MainNav({ items }: MainNavProps) {
           {items?.map((item) =>
             item?.items ? (
               <NavigationMenuItem key={item.title}>
-                <NavigationMenuTrigger className="h-auto capitalize">
+                <NavigationMenuTrigger className="h-auto px-3 capitalize">
                   {item.title}
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
@@ -94,7 +101,10 @@ export function MainNav({ items }: MainNavProps) {
                 <NavigationMenuItem key={item.title}>
                   <Link href={item.href} legacyBehavior passHref>
                     <NavigationMenuLink
-                      className={cn(navigationMenuTriggerStyle(), "h-auto")}
+                      className={cn(
+                        navigationMenuTriggerStyle(),
+                        "h-auto px-3"
+                      )}
                     >
                       {item.title}
                     </NavigationMenuLink>

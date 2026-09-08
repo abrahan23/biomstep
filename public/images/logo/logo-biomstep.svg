@@ -14,4 +14,8 @@
 <path d="M6700 1360 l0 -60 310 0 310 0 23 38 c13 20 29 47 36 60 l12 22 -346 0 -345 0 0 -60z" data-id="elem_8"/>
 <path d="M6700 1030 l0 -60 355 0 355 0 0 60 0 60 -355 0 -355 0 0 -60z" data-id="elem_9"/>
 </g>
+<g id="registered-mark" fill="none" stroke="#2dd4bf" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+<circle cx="861" cy="115" r="13"/>
+<path d="M856.4 121.5 V108.5 H861.6 A3.25 3.25 0 0 1 861.6 115 H856.4 M860.4 115 L865.6 121.5"/>
+</g>
 </svg>
